@@ -1,0 +1,6 @@
+read_liberty [[LIBRARY]]
+read_verilog [[NETLIST]]
+link_design [[TOPMODULE]]
+report_power -digits 5 >opensta_[[TOPMODULE]]_power.rpt
+report_checks -unconstrained -path_delay max -format summary -digits 5 >opensta_[[TOPMODULE]]_timing.rpt
+exit

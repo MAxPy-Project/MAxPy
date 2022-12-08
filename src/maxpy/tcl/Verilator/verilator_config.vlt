@@ -1,0 +1,13 @@
+`verilator_config
+lint_off -rule EOFNEWLINE
+lint_off -rule DECLFILENAME
+lint_off -rule WIDTH
+lint_off -rule CMPCONST
+lint_off -rule BLKSEQ
+lint_off -rule UNDRIVEN
+lint_off -rule COMBDLY
+lint_off -rule LATCH
+lint_off -rule SYNCASYNCNET
+lint_off -rule IMPLICIT
+lint_off -rule UNOPTFLAT
+lint_off -rule PINCONNECTEMPTY
