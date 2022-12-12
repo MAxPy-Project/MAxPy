@@ -1,6 +1,6 @@
-#include "axpy_wrapper_main.h"
+#include "verilator_pybind_wrapper.h"
 
-Instance* AxPy_[[CLASS_NAME]]::axpy_[[INSTANCE_NAME]]() {
+Instance* MAxPy_[[CLASS_NAME]]::maxpy_[[INSTANCE_NAME]]() {
 
     Instance *top, *pi;
 	Net *pn;

@@ -13,29 +13,19 @@ if sys.version_info < (3, 9):
 else:
 	import importlib.resources as importlib_resources
 
-#----------------------------------------------------------------------------------------------------------------------
-#----------------------------------------------------------------------------------------------------------------------
+version = '0.0.1'
 
-version = '1.4.3'
+from .utility import *
 
-from .axpy_helpers import *
-
-#----------------------------------------------------------------------------------------------------------------------
-#----------------------------------------------------------------------------------------------------------------------
-
-#os.environ['PYBIND_LIBS'] = get_python_lib() + '/pybind11/include/'
 os.environ['PYBIND_LIBS'] = sysconfig.get_paths()['purelib'] + '/pybind11/include/'
 os.environ['VERI_LIBS']   = os.getenv("HOME") + '/verilator/include/'
-#os.environ['VERI_FLAGS']  = '-O3 -Wall -shared -std=c++11 -fPIC $(python-config --includes)'
-#os.environ['VERI_FLAGS']  = '-O3 -Wall -shared -std=c++11 -fPIC $(python -m pybind11 --includes)'
-#os.environ['VERI_FLAGS']  = '-O3 -shared -std=c++11 -fPIC $(python -m pybind11 --includes)'
 os.environ['VERI_FLAGS']  = '-O3 -shared -std=c++11 -fPIC $(python -m pybind11 --includes)'
 os.environ['VERI_PATH']   = os.getenv("HOME") + '/verilator/bin/verilator'
 os.environ['VCD2SAIF_SNPS'] = '/lab215/tools/synopsys/design_compiler_L-2016.03/bin/vcd2saif'
 os.environ['VCD2SAIF_CDNS'] = '/lab215/tools/cadence/INCISIVE152/tools.lnx86/simvision/bin/simvisdbutil'
 
-#----------------------------------------------------------------------------------------------------------------------
-#----------------------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 class AxCircuit:
 
@@ -52,7 +42,7 @@ class AxCircuit:
 		):
 
 		# initial message
-		print(f"AxPy - Version {version}")
+		print(f"MAxPy - Version {version}")
 		print("")
 
 		self.top_name = top_name	
@@ -64,7 +54,7 @@ class AxCircuit:
 		self.testbench_script = testbench_script
 		self.synth_tool = synth_tool
 		self.pwd = subprocess.Popen("pwd", shell=True, stdout=subprocess.PIPE).stdout.read().decode().strip('\n')
-		pkg = importlib_resources.files("axpy_framework")	
+		pkg = importlib_resources.files("maxpy")
 		self.library_path_v = str(pkg / "pdk" / "NanGate15nm.v")
 		self.library_path_lib = str(pkg / "pdk" / "NanGate15nm.lib")
 		self.yosys_synth_template_path = str(pkg / "tcl" / "Yosys" / "synth.ys")
@@ -79,7 +69,6 @@ class AxCircuit:
 		self.node_info = []
 		self.prun_flag = False
 		self.prun_netlist = False
-
 
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 	# getters and setters
@@ -157,8 +146,8 @@ class AxCircuit:
 		
 		self.compiled_module_path = "{t}{c}.so".format(t=self.target_compile_dir, c=self.top_name)
 		self.netlist_target_path = "{d}{c}.v".format(d=self.target_netlist_dir, c=self.top_name)
-		self.wrapper_cpp_path = "{d}axpy_wrapper_main.cpp".format(d=self.source_output_dir)
-		self.wrapper_header_path = "{d}axpy_wrapper_main.h".format(d=self.source_output_dir)
+		self.wrapper_cpp_path = "{d}verilator_pybind_wrapper.cpp".format(d=self.source_output_dir)
+		self.wrapper_header_path = "{d}verilator_pybind_wrapper.h".format(d=self.source_output_dir)
 		self.area_report_path = "{t}area_report.txt".format(t=self.target_compile_dir, c=self.top_name)
 		self.power_report_path = "{t}power_report.txt".format(t=self.target_compile_dir, c=self.top_name)
 
@@ -181,7 +170,7 @@ class AxCircuit:
 				#print("  > End\n")
 				if ret_val is not ErrorCodes.OK:
 					print(">>> End: " + get_time_stamp())
-					print(">>> AxPy ERROR: synth process exited with error code \"{error}\". Please check log files".format(error=ret_val))
+					print(">>> MAxPy ERROR: synth process exited with error code \"{error}\". Please check log files".format(error=ret_val))
 					return ret_val
 				else:
 					if self.synth_opt is True:
@@ -210,7 +199,7 @@ class AxCircuit:
 			#print("  > End\n")
 			if ret_val is not ErrorCodes.OK:
 				print(">>> End: " + get_time_stamp())
-				print(">>> AxPy ERROR: process exited with error code \"{error}\". Please check log files".format(error=ret_val))
+				print(">>> MAxPy ERROR: process exited with error code \"{error}\". Please check log files".format(error=ret_val))
 				return ret_val
 
 		print("")
@@ -466,7 +455,7 @@ class AxCircuit:
 			if self.log_opt:
 				# writing logfile
 				# initial information in log file
-				log_file.write('AxPy: SYNTHESIS USING YOSYS\n\n')
+				log_file.write('MAxPy: SYNTHESIS USING YOSYS\n\n')
 				log_file.write('Command line:\n\n')
 				log_file.write(yosys_cmd+'\n')
 				log_file.write(file_text)
@@ -534,7 +523,7 @@ class AxCircuit:
 		# 	genus_cmd = 'genus -64 -legacy_ui -files synth.tcl'
 
 		# 	if self.log_opt:
-		# 		log_file.write('AxPy: SYNTHESIS USING GENUS\n\n')
+		# 		log_file.write('MAxPy: SYNTHESIS USING GENUS\n\n')
 		# 		log_file.write('Command line:\n\n')
 		# 		log_file.write(genus_cmd+'\n')
 		# 		log_file.write(file_text)
@@ -621,7 +610,7 @@ class AxCircuit:
 			log_file = open(log_filename, 'w')
 
 			# initial information in log file
-			log_file.write('AxPy: VERILATOR LOG\n\n')
+			log_file.write('MAxPy: VERILATOR LOG\n\n')
 			log_file.write('Command line:\n\n')
 			log_file.write(verilator_string)
 			log_file.write('\n\n')
@@ -678,7 +667,7 @@ class AxCircuit:
 			log_filename = self.target_compile_dir  + ('log-c2py_parse.txt')
 			#print('  > Creating log file: ' + log_filename)
 			log_file = open(log_filename, 'w')
-			log_file.write('AxPy: VERILATOR/PYBIND WRAPPER\n\n')
+			log_file.write('MAxPy: VERILATOR/PYBIND WRAPPER\n\n')
 			log_file.write(show_structure(top_instance, 0))
 			log_file.write('\n\n')
 			log_file.write(get_time_stamp())
@@ -690,12 +679,12 @@ class AxCircuit:
 		
 		for method in top_instance['methods']:
 			if method != 'trace':
-				pybind_string += '\t\t.def("%s", &AxPy_%s::%s)\n' % (method, self.class_name, method)
+				pybind_string += '\t\t.def("%s", &MAxPy_%s::%s)\n' % (method, self.class_name, method)
 
 		last_name = ''
 		for net in top_instance['nets']:
 			if net['name'] != last_name:
-				pybind_string += '\t\t.def_readwrite("%s", &AxPy_%s::%s)\n' % (net['short_name'], self.class_name, net['name'])
+				pybind_string += '\t\t.def_readwrite("%s", &MAxPy_%s::%s)\n' % (net['short_name'], self.class_name, net['name'])
 				last_name = net['name']
 
 		# get include files
@@ -721,10 +710,10 @@ class AxCircuit:
 		#.................................................................................
 		# replace template data
 
-		file_text = file_text.replace("[[AXPY_VERSION]]", version)
+		file_text = file_text.replace("[[MAXPY_VERSION]]", version)
 		file_text = file_text.replace("[[MODULE_NAME]]", self.top_name)
 		file_text = file_text.replace("[[CLASS_NAME]]", self.class_name)
-		file_text = file_text.replace("[[TOP_INSTANCE_METHOD]]", 'axpy_' + top_instance['name'])
+		file_text = file_text.replace("[[TOP_INSTANCE_METHOD]]", 'maxpy_' + top_instance['name'])
 		file_text = file_text.replace("[[PYTHON_BIDING]]", pybind_string)
 		file_text = file_text.replace("[[DATE_TIME]]", get_time_stamp())
 		file_text = file_text.replace("[[NETLIST_AREA]]", "%f" % (self.area))
@@ -774,7 +763,7 @@ class AxCircuit:
 		else:
 			file_text = file_text.replace("[[INSTANCE_METHODS]]", "")
 		
-		file_text = file_text.replace("[[AXPY_VERSION]]", version)
+		file_text = file_text.replace("[[MAXPY_VERSION]]", version)
 		file_text = file_text.replace("[[HEADER_INCLUDE]]", include_str)
 		file_text = file_text.replace("[[MODULE_NAME]]", self.top_name)
 		file_text = file_text.replace("[[CLASS_NAME]]", self.class_name)
@@ -847,7 +836,7 @@ class AxCircuit:
 			#print('  > Creating log file: ' + log_filename)
 			log_file = open(log_filename, 'w')
 			# initial information in log file
-			log_file.write('AxPy: PYBIND COMPILATION LOG\n\n')
+			log_file.write('MAxPy: PYBIND COMPILATION LOG\n\n')
 			log_file.write('Command line:\n\n')
 			log_file.write(pybind_string)
 			log_file.write('\n\n')
@@ -1201,19 +1190,19 @@ class AxCircuit:
 		if qty > 0:
 			# first net
 			current_instance = instance['instances'][0]
-			code += ('\tpi->head_instance = axpy_%s%s();\n' % (hierarchical_name, current_instance['name']))
+			code += ('\tpi->head_instance = maxpy_%s%s();\n' % (hierarchical_name, current_instance['name']))
 
 			if qty > 1:
 
 				if qty > 2:
 					# intermediate nets
 					for current_instance in instance['instances'][1:qty-1]:
-						code += ('\tpi->next = axpy_%s%s();\n' % (hierarchical_name, current_instance['name']))
+						code += ('\tpi->next = maxpy_%s%s();\n' % (hierarchical_name, current_instance['name']))
 						code += ('\tpi = pi->next;\n')
 
 				# last net
 				current_instance = instance['instances'][qty-1]
-				code += ('\tpi->next = axpy_%s%s();\n' % (hierarchical_name, current_instance['name']))
+				code += ('\tpi->next = maxpy_%s%s();\n' % (hierarchical_name, current_instance['name']))
 		
 		# replace template data
 		file_text = file_text.replace("[[CLASS_NAME]]", self.class_name)
@@ -1222,7 +1211,7 @@ class AxCircuit:
 		file_text = file_text.replace("[[INSTANCE_CODE]]", code)
 
 		# write instance source code file
-		file = open(self.source_output_dir + 'axpy_' + hierarchical_name + '.cpp', 'w')
+		file = open(self.source_output_dir + 'maxpy_' + hierarchical_name + '.cpp', 'w')
 		file.write(file_text)
 		file.close()	
 
@@ -1241,8 +1230,8 @@ class AxCircuit:
 		for instance_name in self.parent_list:
 			name += instance_name
 
-		#method_list = ('\t\tInstance* axpy_%s();\n' % instance['name'])
-		method_list = ('\t\tInstance* axpy_%s();\n' % name)
+		#method_list = ('\t\tInstance* maxpy_%s();\n' % instance['name'])
+		method_list = ('\t\tInstance* maxpy_%s();\n' % name)
 
 		for current_instance in instance['instances']:
 			method_list += self.get_instance_methods(current_instance)
@@ -1284,7 +1273,7 @@ class AxCircuit:
 			log_file = open(log_filename, 'w')
 
 			# initial information in log file
-			log_file.write('AxPy: OpenSTA LOG\n\n')
+			log_file.write('MAxPy: OpenSTA LOG\n\n')
 			log_file.write('Command line:\n\n')
 			log_file.write(sta_string)
 			log_file.write('\n\n')

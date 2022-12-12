@@ -6,6 +6,41 @@
 
 ## Build and install package
 
+### Pre-requisites
+
+* pacman -S python-pip
+* python -m pip install --upgrade pip
+* python -m pip install --upgrade build
+
+
+* Packages:
+cmake
+clang
+gcc
+tcl
+swig
+bison
+flex
+
+* Yosys
+https://github.com/YosysHQ/yosys
+sudo pacman -S yosys
+sudo apt-get install yosys
+
+* OpenSta
+https://github.com/The-OpenROAD-Project/OpenSTA
+(installed from source)
+
+* Verilator
+https://github.com/verilator/verilator
+(currently need version 4.200, install from source)
+
+* Pybind11
+https://github.com/pybind/pybind11
+sudo pacman -S pybind11
+
+
+
 ### First time: cloning package repository
 
 * git clone https://github.com/ysba/maxpy

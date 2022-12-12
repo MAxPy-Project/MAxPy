@@ -1,7 +1,7 @@
-// AxPy [[AXPY_VERSION]]
+// MAxPy [[MAXPY_VERSION]]
 
-#ifndef __AXPY_WRAPPER__
-#define __AXPY_WRAPPER__
+#ifndef __MAXPY_WRAPPER__
+#define __MAXPY_WRAPPER__
 
 #include <pybind11/pybind11.h>
 [[VCD_OPT_IN]]#include "[[VERILATOR_PATH]]verilated_vcd_c.h"[[VCD_OPT_OUT]]
@@ -47,12 +47,12 @@ namespace py = pybind11;
 		Net *head_net;
 };[[SAIF_OPT_OUT]]
 //---------------------------------------------------------------------------------------------------------------------
-// "AxPy_V[[CLASS_NAME]]" class
+// "MAxPy_V[[CLASS_NAME]]" class
 
-class AxPy_[[CLASS_NAME]] : public [[CLASS_NAME]] {
+class MAxPy_[[CLASS_NAME]] : public [[CLASS_NAME]] {
 	public:
-		AxPy_[[CLASS_NAME]](const char* name);
-		~AxPy_[[CLASS_NAME]]();
+		MAxPy_[[CLASS_NAME]](const char* name);
+		~MAxPy_[[CLASS_NAME]]();
 		void eval();
 
 		// saif public methods

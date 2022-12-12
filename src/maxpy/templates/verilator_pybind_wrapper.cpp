@@ -1,11 +1,11 @@
-// AxPy [[AXPY_VERSION]]
+// MAxPy [MAXPY_VERSION]]
 
-#include "axpy_wrapper_main.h"
+#include "verilator_pybind_wrapper.h"
 
 using namespace std;
 using namespace pybind11::literals;
 
-//---------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // "Net" class methods:
 
 [[SAIF_OPT_IN]]Net::Net(const char* name_in, void *p_val, unsigned int bit_mask_in) {
@@ -67,7 +67,7 @@ unsigned int Net::get_val() {
 	}
 }[[SAIF_OPT_OUT]]
 
-//---------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // "Instance" class methods:
 
 [[SAIF_OPT_IN]]Instance::Instance(const char* name_in) {
@@ -77,11 +77,11 @@ unsigned int Net::get_val() {
 	head_net = nullptr;
 }[[SAIF_OPT_OUT]]
 
-//---------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // "AxPy_[[CLASS_NAME]]" class methods:
 
 
-AxPy_[[CLASS_NAME]]::AxPy_[[CLASS_NAME]](const char* name = "TOP") : [[CLASS_NAME]]{name} {
+MAxPy_[[CLASS_NAME]]::MAxPy_[[CLASS_NAME]](const char* name = "TOP") : [[CLASS_NAME]]{name} {
 
 	area = [[NETLIST_AREA]];
 	power = [[NETLIST_POWER]];
@@ -94,7 +94,7 @@ AxPy_[[CLASS_NAME]]::AxPy_[[CLASS_NAME]](const char* name = "TOP") : [[CLASS_NAM
 	saif_path = "";[[SAIF_OPT_OUT]]
 }
 
-AxPy_[[CLASS_NAME]]::~AxPy_[[CLASS_NAME]]() {
+MAxPy_[[CLASS_NAME]]::~MAxPy_[[CLASS_NAME]]() {
 
 	[[VCD_OPT_IN]]if(tfp) {
 		tfp->close();
@@ -107,7 +107,7 @@ AxPy_[[CLASS_NAME]]::~AxPy_[[CLASS_NAME]]() {
 	clear_memory();[[SAIF_OPT_OUT]]
 }
 
-void AxPy_[[CLASS_NAME]]::eval() {
+void MAxPy_[[CLASS_NAME]]::eval() {
 
 	[[CLASS_NAME]]::eval();
 	
@@ -118,7 +118,7 @@ void AxPy_[[CLASS_NAME]]::eval() {
 		tfp->dump(main_time);[[VCD_OPT_OUT]]
 }
 
-[[SAIF_OPT_IN]]void AxPy_[[CLASS_NAME]]::clear_memory() {
+[[SAIF_OPT_IN]]void MAxPy_[[CLASS_NAME]]::clear_memory() {
 
 	Instance *pi, *temp_i;
 	Net *pn, *temp_n;
@@ -142,7 +142,7 @@ void AxPy_[[CLASS_NAME]]::eval() {
 	}
 }
 
-void AxPy_[[CLASS_NAME]]::eval_nets(Instance *pi) {
+void MAxPy_[[CLASS_NAME]]::eval_nets(Instance *pi) {
 	Net *pn;
 
 	if(pi) {
@@ -159,7 +159,7 @@ void AxPy_[[CLASS_NAME]]::eval_nets(Instance *pi) {
 	}
 }
 
-void AxPy_[[CLASS_NAME]]::reset_nets(Instance *pi) {
+void MAxPy_[[CLASS_NAME]]::reset_nets(Instance *pi) {
 	Net *pn;
 
 	if(pi) {
@@ -176,7 +176,7 @@ void AxPy_[[CLASS_NAME]]::reset_nets(Instance *pi) {
 	}
 }
 
-void AxPy_[[CLASS_NAME]]::saif_on_the_fly(int reset = 0) {
+void MAxPy_[[CLASS_NAME]]::saif_on_the_fly(int reset = 0) {
 
 	FILE *file_handler;
 	char temp[256] = {0};
@@ -219,7 +219,7 @@ void AxPy_[[CLASS_NAME]]::saif_on_the_fly(int reset = 0) {
 	last_main_time = main_time;
 }
 
-void AxPy_[[CLASS_NAME]]::saif_print_instance(FILE *file_handler, Instance *pi, int level) {
+void MAxPy_[[CLASS_NAME]]::saif_print_instance(FILE *file_handler, Instance *pi, int level) {
 
 	Net *pn;
 	char tab[256];
@@ -233,19 +233,12 @@ void AxPy_[[CLASS_NAME]]::saif_print_instance(FILE *file_handler, Instance *pi, 
 
 	sprintf(s, "%s(INSTANCE %s\n", tab, pi->name);
 	fputs(s, file_handler);
-
-	//printf("%sinstance: %s\n", tab, pi->name);
-
-
 	
 	sprintf(s, "%s  (NET\n", tab);
 	fputs(s, file_handler);
 
 	pn = pi->head_net;
 	while(pn) {
-
-		//cout << pn->name << end;
-		//printf("%s\n", pn->name);
 		
 		// net name
 		if(pn->bit_mask < 0x40) {
@@ -293,7 +286,7 @@ void AxPy_[[CLASS_NAME]]::saif_print_instance(FILE *file_handler, Instance *pi, 
 }[[SAIF_OPT_OUT]]
 
 
-[[VCD_OPT_IN]]void AxPy_[[CLASS_NAME]]::trace(const char* vcd_path) {
+[[VCD_OPT_IN]]void MAxPy_[[CLASS_NAME]]::trace(const char* vcd_path) {
 	Verilated::traceEverOn(true);
 	tfp = new VerilatedVcdC;
 	[[CLASS_NAME]]::trace(tfp, 99);
@@ -301,7 +294,7 @@ void AxPy_[[CLASS_NAME]]::saif_print_instance(FILE *file_handler, Instance *pi, 
 }[[VCD_OPT_OUT]]
 
 
-// void AxPy_[[CLASS_NAME]]::show_nets(Instance *pi) {
+// void MAxPy_[[CLASS_NAME]]::show_nets(Instance *pi) {
 // 	Net *pn;
 // 	if(pi) {
 // 		printf("instance: %s\n", pi->name);
@@ -330,31 +323,31 @@ void AxPy_[[CLASS_NAME]]::saif_print_instance(FILE *file_handler, Instance *pi, 
 // 		printf("pi nullptr!\n");
 // 	}
 // }
-//---------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // Pybind wrapper code:
 
 PYBIND11_MODULE([[MODULE_NAME]], m) {
-	py::class_<AxPy_[[CLASS_NAME]]>(m, "[[MODULE_NAME]]")
+	py::class_<MAxPy_[[CLASS_NAME]]>(m, "[[MODULE_NAME]]")
 		.def(py::init<const char *>(), py::arg("name")="[[MODULE_NAME]]")
-		.def("name", &AxPy_[[CLASS_NAME]]::name)
-		.def_readwrite("area", &AxPy_[[CLASS_NAME]]::area)
-		.def_readwrite("power", &AxPy_[[CLASS_NAME]]::power)
-		.def_readwrite("timing", &AxPy_[[CLASS_NAME]]::timing)
-		.def_readwrite("parameters", &AxPy_[[CLASS_NAME]]::parameters)
+		.def("name", &MAxPy_[[CLASS_NAME]]::name)
+		.def_readwrite("area", &MAxPy_[[CLASS_NAME]]::area)
+		.def_readwrite("power", &MAxPy_[[CLASS_NAME]]::power)
+		.def_readwrite("timing", &MAxPy_[[CLASS_NAME]]::timing)
+		.def_readwrite("parameters", &MAxPy_[[CLASS_NAME]]::parameters)
 
 		// saif on the fly methods
-		[[SAIF_OPT_IN]].def_readwrite("saif_path", &AxPy_[[CLASS_NAME]]::saif_path)
-		.def_readwrite("node_info", &AxPy_[[CLASS_NAME]]::node_info)
-		.def("saif_on_the_fly", &AxPy_[[CLASS_NAME]]::saif_on_the_fly, py::arg("reset")=0)[[SAIF_OPT_OUT]]
+		[[SAIF_OPT_IN]].def_readwrite("saif_path", &MAxPy_[[CLASS_NAME]]::saif_path)
+		.def_readwrite("node_info", &MAxPy_[[CLASS_NAME]]::node_info)
+		.def("saif_on_the_fly", &MAxPy_[[CLASS_NAME]]::saif_on_the_fly, py::arg("reset")=0)[[SAIF_OPT_OUT]]
 
 		// vcd methods
-		[[VCD_OPT_IN]].def("%s", &AxPy_[[CLASS_NAME]]::trace, py::arg("vcd_path")="")[[VCD_OPT_OUT]]
+		[[VCD_OPT_IN]].def("%s", &MAxPy_[[CLASS_NAME]]::trace, py::arg("vcd_path")="")[[VCD_OPT_OUT]]
 
 [[PYTHON_BIDING]]
 	;
 
 	m.attr("saif_opt") = [[SAIF_OPT_VALUE]];
 }
-//---------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // EOF
-//---------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
