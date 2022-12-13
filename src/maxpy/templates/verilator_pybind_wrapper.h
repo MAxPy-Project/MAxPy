@@ -49,6 +49,7 @@ namespace py = pybind11;
 //---------------------------------------------------------------------------------------------------------------------
 // "MAxPy_V[[CLASS_NAME]]" class
 
+#pragma GCC visibility push(hidden)
 class MAxPy_[[CLASS_NAME]] : public [[CLASS_NAME]] {
 	public:
 		MAxPy_[[CLASS_NAME]](const char* name);
@@ -86,6 +87,7 @@ class MAxPy_[[CLASS_NAME]] : public [[CLASS_NAME]] {
 		[[SAIF_OPT_IN]]std::string saif_path;
 		py::list node_info;[[SAIF_OPT_OUT]]
 };
+#pragma GCC visibility pop
 
 //---------------------------------------------------------------------------------------------------------------------
 #endif
