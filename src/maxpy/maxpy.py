@@ -675,16 +675,44 @@ class AxCircuit:
 			log_file.close()
 
 		#prepare python biding string
-		pybind_string = ''
+		pybind_string = "\t\t// verilator model methods\n"
+		getters_and_setters_declaration = ""
+		getters_and_setters_definition = ""
 		
-		for method in top_instance['methods']:
-			if method != 'trace':
-				pybind_string += '\t\t.def("%s", &MAxPy_%s::%s)\n' % (method, self.class_name, method)
+		for method in top_instance["methods"]:
+			if method != "trace":
+				pybind_string += f"\t\t.def(\"{method}\", &MAxPy_{self.class_name}::{method})\n"
+
+		pybind_string += "\n\t\t// getters and setters for inputs and outpus\n"
 
 		last_name = ''
 		for net in top_instance['nets']:
 			if net['name'] != last_name:
-				pybind_string += '\t\t.def_readwrite("%s", &MAxPy_%s::%s)\n' % (net['short_name'], self.class_name, net['name'])
+
+				# todo: use corret type!
+				s = net["short_name"]
+				t = "int"
+				c = self.class_name
+
+				pybind_string += f"\t\t.def(\"get_{s}\", &MAxPy_{c}::get_{s})\n"
+				pybind_string += f"\t\t.def(\"set_{s}\", &MAxPy_{c}::set_{s})\n"
+				pybind_string += "\n"
+
+				# int get_A();
+				# void set_A(int val);
+				getters_and_setters_declaration += f"\t\t{t} get_{s}();\n\t\tvoid set_{s}({t} val);\n\n"
+
+				# int MAxPy_adder4_exact::get_SUM() {
+				# 	return(adder4_exact::SUM);
+				# }
+				#
+				# void MAxPy_adder4_exact::set_SUM(int val) {
+				# 	adder4_exact::SUM = val;
+				# }
+
+				getters_and_setters_definition += f"{t} MAxPy_{c}::get_{s}() {{\n\treturn({c}::{s});\n}}\n\n"
+				getters_and_setters_definition += f"void MAxPy_{c}::set_{s}({t} val) {{\n\t{c}::{s} = val;\n}}\n\n"
+
 				last_name = net['name']
 
 		# get include files
@@ -715,6 +743,7 @@ class AxCircuit:
 		file_text = file_text.replace("[[CLASS_NAME]]", self.class_name)
 		file_text = file_text.replace("[[TOP_INSTANCE_METHOD]]", 'maxpy_' + top_instance['name'])
 		file_text = file_text.replace("[[PYTHON_BIDING]]", pybind_string)
+		file_text = file_text.replace("[[GETTERS_AND_SETTERS_DEFINITION]]", getters_and_setters_definition)
 		file_text = file_text.replace("[[DATE_TIME]]", get_time_stamp())
 		file_text = file_text.replace("[[NETLIST_AREA]]", "%f" % (self.area))
 		file_text = file_text.replace("[[NETLIST_POWER]]", "%f" % (self.power))
@@ -768,6 +797,7 @@ class AxCircuit:
 		file_text = file_text.replace("[[MODULE_NAME]]", self.top_name)
 		file_text = file_text.replace("[[CLASS_NAME]]", self.class_name)
 		file_text = file_text.replace("[[VERILATOR_PATH]]", os.environ.get('VERI_LIBS'))
+		file_text = file_text.replace("[[GETTERS_AND_SETTERS_DECLARATION]]", getters_and_setters_declaration)
 
 		if self.vcd_opt:
 			file_text = file_text.replace("[[VCD_OPT_IN]]", '')

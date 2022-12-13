@@ -86,7 +86,9 @@ class MAxPy_[[CLASS_NAME]] : public [[CLASS_NAME]] {
 		// saif public properties
 		[[SAIF_OPT_IN]]std::string saif_path;
 		py::list node_info;[[SAIF_OPT_OUT]]
-};
+
+		// getters and setters
+[[GETTERS_AND_SETTERS_DECLARATION]]};
 #pragma GCC visibility pop
 
 //---------------------------------------------------------------------------------------------------------------------

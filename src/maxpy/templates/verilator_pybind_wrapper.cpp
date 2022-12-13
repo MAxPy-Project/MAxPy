@@ -293,6 +293,8 @@ void MAxPy_[[CLASS_NAME]]::saif_print_instance(FILE *file_handler, Instance *pi,
 	tfp->open(vcd_path);
 }[[VCD_OPT_OUT]]
 
+[[GETTERS_AND_SETTERS_DEFINITION]]
+
 
 // void MAxPy_[[CLASS_NAME]]::show_nets(Instance *pi) {
 // 	Net *pn;
@@ -343,8 +345,7 @@ PYBIND11_MODULE([[MODULE_NAME]], m) {
 		// vcd methods
 		[[VCD_OPT_IN]].def("%s", &MAxPy_[[CLASS_NAME]]::trace, py::arg("vcd_path")="")[[VCD_OPT_OUT]]
 
-[[PYTHON_BIDING]]
-	;
+[[PYTHON_BIDING]];
 
 	m.attr("saif_opt") = [[SAIF_OPT_VALUE]];
 }
