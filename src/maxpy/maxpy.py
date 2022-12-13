@@ -18,9 +18,7 @@ version = '0.0.1'
 from .utility import *
 
 os.environ['PYBIND_LIBS'] = sysconfig.get_paths()['purelib'] + '/pybind11/include/'
-os.environ['VERI_LIBS']   = os.getenv("HOME") + '/verilator/include/'
 os.environ['VERI_FLAGS']  = '-O3 -shared -std=c++11 -fPIC $(python -m pybind11 --includes)'
-os.environ['VERI_PATH']   = os.getenv("HOME") + '/verilator/bin/verilator'
 os.environ['VCD2SAIF_SNPS'] = '/lab215/tools/synopsys/design_compiler_L-2016.03/bin/vcd2saif'
 os.environ['VCD2SAIF_CDNS'] = '/lab215/tools/cadence/INCISIVE152/tools.lnx86/simvision/bin/simvisdbutil'
 
@@ -574,7 +572,8 @@ class AxCircuit:
 				
 		if self.synth_opt==True: 
 
-			verilator_string =	os.environ.get('VERI_PATH') + ' ' \
+			#verilator_string =	os.environ.get('VERI_PATH') + ' ' \
+			verilator_string =	'verilator' + ' ' \
 								+ '-Wall -Wno-UNUSED -cc -O0 -top ' + self.top_name + ' ' \
 								+ '-Mdir ' + self.source_output_dir + ' ' \
 								+ self.verilator_config_path + ' ' \
@@ -586,7 +585,8 @@ class AxCircuit:
 
 		else:
 
-			verilator_string = 	os.environ.get('VERI_PATH') + ' ' \
+			#verilator_string = 	os.environ.get('VERI_PATH') + ' ' \
+			verilator_string =	'verilator' + ' ' \
 								+ '-Wall -Wno-UNUSED -cc -top ' + self.top_name + ' ' \
 								+ '-Mdir ' + self.source_output_dir + ' ' \
 								+ self.verilator_config_path + ' ' \
@@ -595,6 +595,8 @@ class AxCircuit:
 								+ self.axlib_path + ' ' \
 								+ '--prefix ' + self.class_name + ' ' \
 								+ '--mod-prefix sub'
+
+		print(verilator_string)
 
 
 		if self.vcd_opt == True:
@@ -796,7 +798,7 @@ class AxCircuit:
 		file_text = file_text.replace("[[HEADER_INCLUDE]]", include_str)
 		file_text = file_text.replace("[[MODULE_NAME]]", self.top_name)
 		file_text = file_text.replace("[[CLASS_NAME]]", self.class_name)
-		file_text = file_text.replace("[[VERILATOR_PATH]]", os.environ.get('VERI_LIBS'))
+		file_text = file_text.replace("[[VERILATOR_PATH]]", "/usr/share/verilator/include/")
 		file_text = file_text.replace("[[GETTERS_AND_SETTERS_DECLARATION]]", getters_and_setters_declaration)
 
 		if self.vcd_opt:
@@ -844,10 +846,10 @@ class AxCircuit:
 			pybind_string = \
 				'c++' + ' ' \
 				+ os.environ.get('VERI_FLAGS') + ' ' \
-				+'-I' + os.environ.get('PYBIND_LIBS') + ' ' \
-				+'-I' + os.environ.get('VERI_LIBS') + ' ' \
-				+ os.environ.get('VERI_LIBS') + 'verilated.cpp' + ' ' \
-				+ os.environ.get('VERI_LIBS') + 'verilated_vcd_c.cpp' + ' ' \
+				+ '-I' + os.environ.get('PYBIND_LIBS') + ' ' \
+				+ '-I /usr/share/verilator/include' + ' ' \
+				+ '/usr/share/verilator/include/verilated.cpp' + ' ' \
+				+ '/usr/share/verilator/include/verilated_vcd_c.cpp' + ' ' \
 				+ self.source_output_dir  + '*.cpp' + ' ' \
 				+ '-o ' + self.compiled_module_path 
 		else:
@@ -855,9 +857,9 @@ class AxCircuit:
 				'c++' + ' ' \
 				+ os.environ.get('VERI_FLAGS') + ' ' \
 				+'-I' + os.environ.get('PYBIND_LIBS') + ' ' \
-				+'-I' + os.environ.get('VERI_LIBS') + ' ' \
+				+ '-I /usr/share/verilator/include' + ' ' \
+				+ '/usr/share/verilator/include/verilated.cpp' + ' ' \
 				+ self.source_output_dir  + '*.cpp' + ' ' \
-				+ os.environ.get('VERI_LIBS') + 'verilated.cpp' + ' ' \
 				+'-o ' + self.compiled_module_path
 
 		if self.log_opt:

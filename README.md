@@ -33,7 +33,7 @@ https://github.com/The-OpenROAD-Project/OpenSTA
 
 * Verilator
 https://github.com/verilator/verilator
-(currently need version 4.200, install from source)
+sudo pacman -S verilator
 
 * Pybind11
 https://github.com/pybind/pybind11
