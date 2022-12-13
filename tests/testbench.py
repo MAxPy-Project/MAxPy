@@ -1,6 +1,6 @@
 import importlib
 
-def testbench_run(mod, test):
+def testbench_run(mod, logpath=None):
 
     adder = mod.adder4()
 
@@ -18,14 +18,7 @@ def testbench_run(mod, test):
     return False, []
 
 
-
-
 if __name__ == "__main__":
 
-    mod = importlib.import_module(name="build_adder4_k1.adder4")
+    mod = importlib.import_module(name="adder4_exact_build.adder4")
     testbench_run(mod)
-    
-    mod = importlib.import_module(name="build_adder4_k2.adder4")
-    testbench_run(mod)
-
-    
