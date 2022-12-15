@@ -278,7 +278,7 @@ class AxCircuit:
 			print("> Testbench init")
 			mod_name = f"{self.pymod_path}.{self.top_name}"
 			mod = importlib.import_module(mod_name, package=None)			
-			self.prun_flag, self.node_info = self.testbench_script(mod, f"{self.target_compile_dir}log-testbench.txt")
+			self.prun_flag, self.node_info = self.testbench_script(mod, f"{self.target_compile_dir}log-testbench.txt", True)
 			print("> Testbench end\n")
 			return ErrorCodes.OK
 
@@ -1349,7 +1349,10 @@ class AxCircuit:
 		self.timing = 0.0
 		if len(timing_report_lines) >= 3:
 			data_line = timing_report_lines[2].rsplit()
-			self.timing = float(data_line[-1])
+			try:
+				self.timing = float(data_line[-1])
+			except:
+				self.timing = 0.0
 
 		print(f"  > Netlist estimated power = {self.power} W")
 		print(f"  > Netlist estimated maximum delay = {self.timing} nS")
