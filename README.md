@@ -8,24 +8,32 @@
 
 ### Pre-requisites
 
-* pacman -S python-pip
-* python -m pip install --upgrade pip
-* python -m pip install --upgrade build
-
-
-* Packages:
-cmake
-clang
-gcc
-tcl
-swig
-bison
-flex
+* System packages:
+  * cmake
+  * clang
+  * gcc
+  * tcl
+  * swig
+  * bison
+  * flex
+  * pip
+  
+* Python packages:
+  * build
+  * matplotlib
+  
+```sh
+python -m pip install --upgrade build
+pip install matplotlib
+```
 
 * Yosys
 https://github.com/YosysHQ/yosys
+
+```sh
 sudo pacman -S yosys
 sudo apt-get install yosys
+```
 
 * OpenSta
 https://github.com/The-OpenROAD-Project/OpenSTA
