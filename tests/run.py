@@ -1,11 +1,12 @@
-from maxpy import *
+from MAxPy import *
 from testbench import testbench_run
 
 circuit = maxpy.AxCircuit(top_name="adder4")#, synth_overwrite = True)
 circuit.set_testbench_script(testbench_run)
 circuit.set_synth_tool("yosys")
-circuit.rtl2py(target="exact",log_opt=False)
-#circuit.parameters = {
+circuit.rtl2py(target="exact",log_opt=True)
+
+    #circuit.parameters = {
 #    "[[PARAM_K]]": ["1","2"],
 #    "[[PARAM_ADDER01]]": ["copyA","copyB"],
 #}

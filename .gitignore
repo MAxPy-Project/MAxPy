@@ -1,4 +1,4 @@
-src/maxpy.egg-info
+src/*.egg-info
 dist/
 tests/__pycache__
 tests/adder4_*

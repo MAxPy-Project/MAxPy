@@ -27,7 +27,7 @@ os.environ['VCD2SAIF_CDNS'] = '/lab215/tools/cadence/INCISIVE152/tools.lnx86/sim
 
 class AxCircuit:
 
-	def __init__(self, 
+	def __init__(self,
 		top_name="",
 		tech="NanGate15nm",
 		synth_tool=None,
@@ -43,7 +43,7 @@ class AxCircuit:
 		print(f"MAxPy - Version {version}")
 		print("")
 
-		self.top_name = top_name	
+		self.top_name = top_name
 		self.tech = tech
 		self.xml_opt = xml_opt
 		self.clk_signal = clk_signal
@@ -52,7 +52,7 @@ class AxCircuit:
 		self.testbench_script = testbench_script
 		self.synth_tool = synth_tool
 		self.pwd = subprocess.Popen("pwd", shell=True, stdout=subprocess.PIPE).stdout.read().decode().strip('\n')
-		pkg = importlib_resources.files("maxpy")
+		pkg = importlib_resources.files("MAxPy")
 		self.library_path_v = str(pkg / "pdk" / "NanGate15nm.v")
 		self.library_path_lib = str(pkg / "pdk" / "NanGate15nm.lib")
 		self.yosys_synth_template_path = str(pkg / "tcl" / "Yosys" / "synth.ys")
@@ -88,14 +88,14 @@ class AxCircuit:
 
 
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .		
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-				
+	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
 	def rtl2py(
-		self, 
-		base="", 
-		target="", 
-		area_estimation=True, 
+		self,
+		base="",
+		target="",
+		area_estimation=True,
 		log_opt=True,
 		vcd_opt=False,
 		saif_opt=True,
@@ -107,7 +107,7 @@ class AxCircuit:
 
 		if base == "":
 			base = 'rtl'
-		
+
 		if target == "":
 			target = "level_00"
 			self.current_parameter = ""
@@ -115,9 +115,9 @@ class AxCircuit:
 			self.current_parameter = target
 
 		self.class_name = f"{self.top_name}_{target}"
-		
+
 		print(f">>> Converting Verilog RTL design \"{self.top_name}\" into Python module, base \"{base}\", target \"{target}\"")
-		
+
 		print(">>> Start: " + get_time_stamp())
 		print("")
 
@@ -133,7 +133,7 @@ class AxCircuit:
 			self.synth_tool = "yosys"
 
 		self.base_path = f"{base}/*.v"
-		if self.group_dir == "":			
+		if self.group_dir == "":
 			self.target_compile_dir = f"{self.top_name}_{target}_build/"
 			self.pymod_path = f"{self.top_name}_{target}_build"
 		else:
@@ -141,7 +141,7 @@ class AxCircuit:
 			self.pymod_path = f"{self.group_dir}.{self.top_name}_{target}_build"
 		self.target_netlist_dir = "{t}netlist_{s}/".format(t=self.target_compile_dir, s=self.synth_tool)
 		self.source_output_dir = "{t}source/".format(t=self.target_compile_dir)
-		
+
 		self.compiled_module_path = "{t}{c}.so".format(t=self.target_compile_dir, c=self.top_name)
 		self.netlist_target_path = "{d}{c}.v".format(d=self.target_netlist_dir, c=self.top_name)
 		self.wrapper_cpp_path = "{d}verilator_pybind_wrapper.cpp".format(d=self.source_output_dir)
@@ -151,8 +151,8 @@ class AxCircuit:
 
 		os.makedirs(self.target_compile_dir, exist_ok = True)
 		os.makedirs(self.source_output_dir, exist_ok = True)
-		
-		if self.synth_opt is True or area_estimation is True: 
+
+		if self.synth_opt is True or area_estimation is True:
 			os.makedirs(self.target_netlist_dir, exist_ok = True)
 
 		self.trace_levels = 99  ##TODO: ???
@@ -175,13 +175,13 @@ class AxCircuit:
 						self.base_path = self.netlist_target_path
 					else:
 						self.synth_tool = None
-					
+
 					self.get_area(self.netlist_target_path)
-					self.get_power_and_timing(self.netlist_target_path)					
+					self.get_power_and_timing(self.netlist_target_path)
 		else:
 			self.get_area(f"{base}/{self.top_name}.v")
 			self.get_power_and_timing(f"{base}/{self.top_name}.v")
-			
+
 		process_list = [
 			self.veri2c,
 			self.c2py_parse,
@@ -204,8 +204,8 @@ class AxCircuit:
 		print(">>> End: " + get_time_stamp())
 		print(">>> Circuit \"{t}\" compiled successfully!".format(t=self.top_name))
 		print("")
-		
-		
+
+
 		return ErrorCodes.OK
 
 
@@ -254,14 +254,14 @@ class AxCircuit:
 				file =  open(f"{base}/{self.top_name}.v", 'w')
 				file.write(rtl_source_edit)
 				file.close()
-		
+
 				ret_val = self.rtl2py(
-					base=base, 
+					base=base,
 					target=target,
-					area_estimation=area_estimation, 
+					area_estimation=area_estimation,
 					saif_opt=saif_opt
 				)
-				
+
 				#if ret_val is ErrorCodes.OK:
 				#	self.testbench()
 
@@ -277,7 +277,7 @@ class AxCircuit:
 		if self.testbench_script is not None:
 			print("> Testbench init")
 			mod_name = f"{self.pymod_path}.{self.top_name}"
-			mod = importlib.import_module(mod_name, package=None)			
+			mod = importlib.import_module(mod_name, package=None)
 			self.prun_flag, self.node_info = self.testbench_script(mod, f"{self.target_compile_dir}log-testbench.txt", True)
 			print("> Testbench end\n")
 			return ErrorCodes.OK
@@ -323,7 +323,7 @@ class AxCircuit:
 				high_prob_logic_level = "p1"
 			node["high_prob_value"] = high_prob_value
 			node["high_prob_logic_level"] = high_prob_logic_level
-		
+
 		sorted_node_list = sorted(self.node_info, key=lambda d: d["high_prob_value"], reverse=True)
 		nodes_to_prun = int(float(netlist_node_count)*float(prun_level)/100.0)
 		if nodes_to_prun == 0:
@@ -358,7 +358,7 @@ class AxCircuit:
 
 		self.prun_netlist = True
 		self.rtl2py(
-			base=probprun_netlist_path, 
+			base=probprun_netlist_path,
 			target=f"{self.current_parameter}_probprun_{prun_level_str}",
 		)
 		self.prun_netlist = False
@@ -412,7 +412,7 @@ class AxCircuit:
 	# synth
 
 	def synth(self):
-		
+
 		print("> Synth")
 
 		#if os.path.isfile(self.netlist_target_path) == True:
@@ -442,14 +442,14 @@ class AxCircuit:
 			file_text = file_text.replace("[[LIBRARYABC]]", self.library_path_lib)
 			file = open('synth.ys',"w")
 			file.write(file_text)
-			file.close()			
+			file.close()
 
 			# - - - - - - - - - - - - - - - Execute yosys - - - - - - - - - - - - - -
 
 			yosys_cmd = 'yosys synth.ys;'
-			
+
 			# TODO: check exception
-			
+
 			if self.log_opt:
 				# writing logfile
 				# initial information in log file
@@ -467,7 +467,7 @@ class AxCircuit:
 
 			#print('  > Running synth tool command: %s' % (yosys_cmd))
 
-			# execute compilation command as subprocess		
+			# execute compilation command as subprocess
 			if self.log_opt:
 				child = subprocess.Popen(yosys_cmd, stdout=log_file, stderr=subprocess.STDOUT, shell=True)
 			else:
@@ -486,28 +486,28 @@ class AxCircuit:
 				ret_val = ErrorCodes.SYNTH_ERROR
 			else:
 				ret_val = ErrorCodes.OK
-			
+
 			# - - - - - - - - - - - - - Delete temporary Files - - - - - - - - - - - -
 			os.remove ("synth.ys")
-			
+
 			#return self.error_code
 
 			return ret_val
 
-		# ##TODO	
+		# ##TODO
 		# elif(self.synth_tool == 'genus'):
-	
+
 		# 	template_tcl = 'tcl/Genus/synth.tcl'
 		# 	file = open(template_tcl,'r')
 		# 	file_text = file.read()
 		# 	file.close()
 
 		# 	genus_netlist_path = 'circuits/' + self.top_name + '/netlist/' + self.top_name + '_genus' '.v'
- 
+
 		# 	filenames = ' '.join(next(walk(os.path.dirname(self.synth_input_path)), (None, None, []))[2])
 
 		# 	#RTL NAME TEM Q CONFERIR
-		# 	file_text = file_text.replace("[[RTLFILENAME]]", filenames) 
+		# 	file_text = file_text.replace("[[RTLFILENAME]]", filenames)
 		# 	file_text = file_text.replace("[[RTLFILEPATH]]", os.path.dirname(self.synth_input_path))
 		# 	file_text = file_text.replace("[[TOPMODULE]]", self.top_name)
 		# 	#file_text = file_text.replace("[[NETLIST]]", genus_netlist_path)
@@ -517,7 +517,7 @@ class AxCircuit:
 		# 	file = open('synth.tcl',"w")
 		# 	file.write(file_text)
 		# 	file.close()
-			
+
 		# 	genus_cmd = 'genus -64 -legacy_ui -files synth.tcl'
 
 		# 	if self.log_opt:
@@ -544,15 +544,15 @@ class AxCircuit:
 
 		# 	if self.log_opt:
 		# 		log_file.close()				# close log file
-			
-		# 	#os.remove ("synth.tcl")		
+
+		# 	#os.remove ("synth.tcl")
 		# 	#os.remove("genus.log")
 		# 	#os.remove("genus.cmd")
 
 		# 	subprocess.Popen("rm synth.tcl", shell=True)
 		# 	subprocess.Popen("rm genus.log", shell=True)
 		# 	subprocess.Popen("rm genus.cmd", shell=True)
-			
+
 		# 	#self.adapt_genus_netlist()
 
 		# 	if self.error_code != 0:
@@ -569,8 +569,8 @@ class AxCircuit:
 
 		if remove_old_files(self.source_output_dir + '*') != 0:
 			return ErrorCodes.VERI2C_ERROR
-				
-		if self.synth_opt==True: 
+
+		if self.synth_opt==True:
 
 			#verilator_string =	os.environ.get('VERI_PATH') + ' ' \
 			verilator_string =	'verilator' + ' ' \
@@ -627,7 +627,7 @@ class AxCircuit:
 
 		#print('  > Running verilation command')#: ' + verilator_string)
 
-		# execute compilation command as subprocess		
+		# execute compilation command as subprocess
 		if self.log_opt:
 			child = subprocess.Popen(verilator_string, stdout=log_file, stderr=subprocess.STDOUT, shell=True)
 		else:
@@ -646,7 +646,7 @@ class AxCircuit:
 			ret_val = ErrorCodes.VERI2C_ERROR
 		else:
 			ret_val = ErrorCodes.OK
-		
+
 		return ret_val
 
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -680,7 +680,7 @@ class AxCircuit:
 		pybind_string = "\t\t// verilator model methods\n"
 		getters_and_setters_declaration = ""
 		getters_and_setters_definition = ""
-		
+
 		for method in top_instance["methods"]:
 			if method != "trace":
 				pybind_string += f"\t\t.def(\"{method}\", &MAxPy_{self.class_name}::{method})\n"
@@ -736,7 +736,7 @@ class AxCircuit:
 		file = open(self.wrapper_cpp_template,'r')
 		file_text = file.read()
 		file.close()
-		
+
 		#.................................................................................
 		# replace template data
 
@@ -777,7 +777,7 @@ class AxCircuit:
 
 		file = open(self.wrapper_cpp_path, 'w')
 		file.write(file_text)
-		file.close()	
+		file.close()
 
 		#.................................................................................
 		# open template for header file
@@ -788,12 +788,12 @@ class AxCircuit:
 
 		# edit header template file
 		self.parent_list = []
-		
+
 		if self.saif_opt is True:
 			file_text = file_text.replace("[[INSTANCE_METHODS]]", self.get_instance_methods(top_instance))
 		else:
 			file_text = file_text.replace("[[INSTANCE_METHODS]]", "")
-		
+
 		file_text = file_text.replace("[[MAXPY_VERSION]]", version)
 		file_text = file_text.replace("[[HEADER_INCLUDE]]", include_str)
 		file_text = file_text.replace("[[MODULE_NAME]]", self.top_name)
@@ -820,7 +820,7 @@ class AxCircuit:
 
 		file = open(self.wrapper_header_path, 'w')
 		file.write(file_text)
-		file.close()	
+		file.close()
 
 
 		return ErrorCodes.OK
@@ -831,7 +831,7 @@ class AxCircuit:
 	def c2py_compile (self):
 
 		print("> C++ compilation")
-		
+
 
 		# remove old files from previous compilation
 		if remove_old_files(self.compiled_module_path) != 0:
@@ -839,7 +839,7 @@ class AxCircuit:
 
 		# to include VCD_files = verilated_vcd_c.h
 		# https://zipcpu.com/blog/2017/06/21/looking-at-verilator.html
-		
+
 		# assemble terminal command for pybind compilation
 
 		if self.vcd_opt == True:
@@ -851,7 +851,7 @@ class AxCircuit:
 				+ '/usr/share/verilator/include/verilated.cpp' + ' ' \
 				+ '/usr/share/verilator/include/verilated_vcd_c.cpp' + ' ' \
 				+ self.source_output_dir  + '*.cpp' + ' ' \
-				+ '-o ' + self.compiled_module_path 
+				+ '-o ' + self.compiled_module_path
 		else:
 			pybind_string = \
 				'c++' + ' ' \
@@ -884,7 +884,7 @@ class AxCircuit:
 
 		#print('  > Running compilation command')#: ' + pybind_string)
 
-		# execute compilation command as subprocess		
+		# execute compilation command as subprocess
 		if self.log_opt:
 			child = subprocess.Popen(pybind_string, stdout=log_file, stderr=subprocess.STDOUT, shell=True)
 		else:
@@ -898,12 +898,12 @@ class AxCircuit:
 			log_file.write(get_time_stamp())
 			log_file.write('\n\n')
 			log_file.close()
-		
+
 		if error_code != 0:
 			ret_val = ErrorCodes.C2PY_COMPILE_ERROR
 		else:
 			ret_val = ErrorCodes.OK
-		
+
 		return ret_val
 
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -912,7 +912,7 @@ class AxCircuit:
 	def checkpymod (self):
 
 		print("> Module check (should print module\'s name)")
-		
+
 		#print('  > Runnin test script (should print module\'s name):')
 
 		module_test_string = "python -c \""
@@ -999,8 +999,8 @@ class AxCircuit:
 							name = line.split()[2].replace(';','')
 
 
-						if class_name == "sub_" + self.top_name:	
-							self.parent_list.append(name)		
+						if class_name == "sub_" + self.top_name:
+							self.parent_list.append(name)
 							instance['instances'].append(self.parse_verilator_header(class_name + '.h', 	name))
 							self.parent_list = self.parent_list[:-1]
 
@@ -1016,7 +1016,7 @@ class AxCircuit:
 		ports_flag = 0
 		local_signals_flag = 0
 		for line in text:
-			line = line.strip(' \t\n\r')		
+			line = line.strip(' \t\n\r')
 			if line.find('private') == 0:
 				private_flag = 1
 			elif line.find('public') == 0:
@@ -1048,8 +1048,8 @@ class AxCircuit:
 
 
 			if ports_flag:
-				search = re.search(r'^VL_(SIG|IN|OUT|INOUT)', line)			
-				if search is not None:			
+				search = re.search(r'^VL_(SIG|IN|OUT|INOUT)', line)
+				if search is not None:
 					start, size_start = search.span()
 					size_end = line.index('(')
 					size = line[size_start:size_end]
@@ -1063,7 +1063,7 @@ class AxCircuit:
 					else:
 						size = 0
 						type = 'single'
-					
+
 					name_start = size_end + 1
 					name_end = line.index(',')
 					name = line[name_start:name_end]
@@ -1111,14 +1111,14 @@ class AxCircuit:
 								#bit -= 1
 								net = {'name': name, 'bit_mask': bit, 'short_name': short_name, 'parent': local_parent}
 								net_list.append(net)
-					
+
 					#TODO: ADD biding code for array port
 					#else:
 					#	print('    port[name: %s (%s), size: %s[%d][%d:%d]] << %s >>' % (name, direction, size, array, msb, lsb, line))
 
 			elif local_signals_flag:
 				if 'CData' in line or 'SData' in line or 'IData' in line or 'WData' in line:
-					
+
 					name = line.split()[1].replace(';', '')
 
 					if '[' in name:
@@ -1147,7 +1147,7 @@ class AxCircuit:
 
 					if 'PVT' in short_name:
 						short_name = short_name.replace('PVT', '')
-						
+
 					if 'DOT' in short_name:
 						short_name = short_name.replace('DOT', '')
 
@@ -1165,7 +1165,7 @@ class AxCircuit:
 
 					net = {'name': name, 'bit_mask': 0x40, 'short_name': short_name, 'parent': local_parent}
 
-					
+
 					net_list.append(net)
 
 
@@ -1173,7 +1173,7 @@ class AxCircuit:
 
 
 	def write_instance_source_files(self, instance, skip_nets_first=False):
-		
+
 		name = instance['name']
 		self.parent_list.append(name)
 
@@ -1207,7 +1207,7 @@ class AxCircuit:
 				net = instance['nets'][len(instance['nets'])-1]
 				code += ('\tpn->next = new Net("%s", &%s, %d);\n' % (net['short_name'], get_net_hierarchical_name(net), net['bit_mask']))
 				code += ('\n')
-			
+
 			else:
 				# last net
 				net = instance['nets'][len(instance['nets'])-1]
@@ -1235,7 +1235,7 @@ class AxCircuit:
 				# last net
 				current_instance = instance['instances'][qty-1]
 				code += ('\tpi->next = maxpy_%s%s();\n' % (hierarchical_name, current_instance['name']))
-		
+
 		# replace template data
 		file_text = file_text.replace("[[CLASS_NAME]]", self.class_name)
 		#file_text = file_text.replace("[[MODULE_NAME]]", self.top_name)
@@ -1245,7 +1245,7 @@ class AxCircuit:
 		# write instance source code file
 		file = open(self.source_output_dir + 'maxpy_' + hierarchical_name + '.cpp', 'w')
 		file.write(file_text)
-		file.close()	
+		file.close()
 
 		# write files for sub instances
 		for current_instance in instance['instances']:
