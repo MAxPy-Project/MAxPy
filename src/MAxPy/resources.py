@@ -13,6 +13,11 @@ class Resources:
         "NanGate15nm",
         ]
 
+    synth_tools = [
+        "yosys",
+        "genus"
+        ]
+
     # load resources from MAxPy package
     pkg = importlib_resources.files("MAxPy")
 

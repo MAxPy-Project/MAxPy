@@ -19,6 +19,7 @@ from .utility import *
 
 #import resources
 from .resources import Resources
+from .synth import synth
 
 os.environ['PYBIND_LIBS'] = sysconfig.get_paths()['purelib'] + '/pybind11/include/'
 os.environ['VERI_FLAGS']  = '-O3 -shared -std=c++11 -fPIC $(python -m pybind11 --includes)'
@@ -122,7 +123,7 @@ class AxCircuit:
 		print("")
 
 		if self.synth_tool is not None:
-			if self.synth_tool in synth_tools:
+			if self.synth_tool in self.res.synth_tools:
 				self.synth_opt = True
 			else:
 				self.synth_opt = False
@@ -164,7 +165,7 @@ class AxCircuit:
 		# synth: synthesize RTL file (optional)
 		if self.prun_netlist is False:
 			if self.synth_opt is True or area_estimation is True:
-				ret_val = self.synth()
+				ret_val = synth(self)
 				#print("  > End\n")
 				if ret_val is not ErrorCodes.OK:
 					print(">>> End: " + get_time_stamp())
@@ -413,158 +414,7 @@ class AxCircuit:
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 	# synth
 
-	def synth(self):
 
-		print("> Synth")
-
-		#if os.path.isfile(self.netlist_target_path) == True:
-		#	print('\n  > There is already a netlist for the selected synth tool.\n    Do you want to run the syhtnesis option again and overwrite the existing netlist? (Y / N) + Enter')
-		#	user = input()
-
-		#	if user == 'n' or user == 'N' or user == 'No' or user == 'NO':
-		#		print('  > Skipping synth step')
-		#		return ErrorCodes.OK
-
-		if self.log_opt:
-			# create log file
-			log_filename = "{d}log-synthesis.txt".format(d=self.target_compile_dir)
-			#print('  > Creating log file: ' + log_filename)
-			log_file = open(log_filename, 'w')
-
-		if self.synth_tool == 'yosys':
-
-			#file = open(self.yosys_synth_template_path,'r')
-			#file_text = file.read()
-			#file.close()
-			file_text = self.res.template_yosys_synth
-			#file_text = file_text.replace("[[RTLFILENAME]]", f"{self.axlib_path} {self.base_path}")
-			file_text = file_text.replace("[[RTLFILENAME]]", f"{self.base_path}")
-			file_text = file_text.replace("[[LIBFILENAME]]", f"{self.res.path_tech_verilog}")
-			file_text = file_text.replace("[[TOPMODULE]]", self.top_name)
-			file_text = file_text.replace("[[NETLIST]]", self.netlist_target_path)
-			file_text = file_text.replace("[[LIBRARY]]", self.res.path_tech_lib)
-			file_text = file_text.replace("[[LIBRARYABC]]", self.res.path_tech_lib)
-			file = open('synth.ys',"w")
-			file.write(file_text)
-			file.close()
-			print(self.res.template_yosys_synth)
-			print(file_text)
-
-			# - - - - - - - - - - - - - - - Execute yosys - - - - - - - - - - - - - -
-
-			yosys_cmd = 'yosys synth.ys;'
-
-			# TODO: check exception
-
-			if self.log_opt:
-				# writing logfile
-				# initial information in log file
-				log_file.write('MAxPy: SYNTHESIS USING YOSYS\n\n')
-				log_file.write('Command line:\n\n')
-				log_file.write(yosys_cmd+'\n')
-				log_file.write(file_text)
-				log_file.write('\n\n')
-				log_file.write('Terminal log:\n\n')
-
-				# close file and then open it again to avoid concurrency problems with subprocess call below
-				log_file.close()
-				# reopen log file as append
-				log_file = open(log_filename, 'a')
-
-			#print('  > Running synth tool command: %s' % (yosys_cmd))
-
-			# execute compilation command as subprocess
-			if self.log_opt:
-				child = subprocess.Popen(yosys_cmd, stdout=log_file, stderr=subprocess.STDOUT, shell=True)
-			else:
-				child = subprocess.Popen(yosys_cmd, shell=True)
-
-			child.communicate()
-			error_code = child.wait()
-
-			# close logfile
-			if self.log_opt:
-				log_file.write("Synth command exit code: {code}".format(code=error_code))
-
-				log_file.close()
-
-			if error_code != 0:
-				ret_val = ErrorCodes.SYNTH_ERROR
-			else:
-				ret_val = ErrorCodes.OK
-
-			# - - - - - - - - - - - - - Delete temporary Files - - - - - - - - - - - -
-			os.remove ("synth.ys")
-
-			#return self.error_code
-
-			return ret_val
-
-		# ##TODO
-		# elif(self.synth_tool == 'genus'):
-
-		# 	template_tcl = 'tcl/Genus/synth.tcl'
-		# 	file = open(template_tcl,'r')
-		# 	file_text = file.read()
-		# 	file.close()
-
-		# 	genus_netlist_path = 'circuits/' + self.top_name + '/netlist/' + self.top_name + '_genus' '.v'
-
-		# 	filenames = ' '.join(next(walk(os.path.dirname(self.synth_input_path)), (None, None, []))[2])
-
-		# 	#RTL NAME TEM Q CONFERIR
-		# 	file_text = file_text.replace("[[RTLFILENAME]]", filenames)
-		# 	file_text = file_text.replace("[[RTLFILEPATH]]", os.path.dirname(self.synth_input_path))
-		# 	file_text = file_text.replace("[[TOPMODULE]]", self.top_name)
-		# 	#file_text = file_text.replace("[[NETLIST]]", genus_netlist_path)
-		# 	file_text = file_text.replace("[[NETLIST]]", self.netlist_path)
-		# 	file_text = file_text.replace("[[LIBRARY]]", f"pdk/{self.tech}.lib")
-		# 	file_text = file_text.replace("[[SDCFILE]]", "tcl/Genus/constraints.sdc")
-		# 	file = open('synth.tcl',"w")
-		# 	file.write(file_text)
-		# 	file.close()
-
-		# 	genus_cmd = 'genus -64 -legacy_ui -files synth.tcl'
-
-		# 	if self.log_opt:
-		# 		log_file.write('MAxPy: SYNTHESIS USING GENUS\n\n')
-		# 		log_file.write('Command line:\n\n')
-		# 		log_file.write(genus_cmd+'\n')
-		# 		log_file.write(file_text)
-		# 		log_file.write('\n\n')
-		# 		log_file.write('Terminal log:\n\n')
-		# 		# close file and then open it again to avoid concurrency problems with subprocess call below
-		# 		log_file.close()
-		# 		# reopen log file as append
-		# 		log_file = open(log_filename, 'a')
-
-		# 	print('  > Running compilation command: %s' % (genus_cmd))
-
-		# 	if self.log_opt:
-		# 		child = subprocess.Popen(genus_cmd, stdout=log_file, stderr=subprocess.STDOUT, shell=True)
-		# 	else:
-		# 		child = subprocess.Popen(genus_cmd, shell=True)
-
-		# 	child.communicate()
-		# 	self.error_code = child.wait()
-
-		# 	if self.log_opt:
-		# 		log_file.close()				# close log file
-
-		# 	#os.remove ("synth.tcl")
-		# 	#os.remove("genus.log")
-		# 	#os.remove("genus.cmd")
-
-		# 	subprocess.Popen("rm synth.tcl", shell=True)
-		# 	subprocess.Popen("rm genus.log", shell=True)
-		# 	subprocess.Popen("rm genus.cmd", shell=True)
-
-		# 	#self.adapt_genus_netlist()
-
-		# 	if self.error_code != 0:
-		# 		self.error_msg = 'Error runnin GENUS SYNTH command\nPlease check log file (%s)' % log_filename
-
-		# 	return self.error_code
 
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 	# veri2c

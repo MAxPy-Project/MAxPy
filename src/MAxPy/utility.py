@@ -28,9 +28,6 @@ class ErrorCodes(enum.Enum):
     C2PY_COMPILE_ERROR = enum.auto()
     CHECKPYMOD_ERROR = enum.auto()
 
-synth_tools = ['yosys', 'genus']
-
-
 def remove_old_files(path):
     rm_old_files_string = "rm -f {path}".format(path=path)
     child = subprocess.Popen(rm_old_files_string, shell=True)
@@ -41,7 +38,7 @@ def remove_old_files(path):
     #     print('  > Removing files from last compilation... Ok!')
     # else:
     #     print('  > Removing files from last compilation... Error, return code %d' % exit_code)
-        
+
     return exit_code
 
 def get_time_stamp():
@@ -148,7 +145,7 @@ def write_net_structure(str, instance, level, instance_index):
 	tab = '\t\t\t'
 	for i in range(level):
 		tab += '\t'
-	
+
 	if level == 0:
 		str += ('%stop_instance = new Instance("%s", NULL);\n' % (tab, instance['name']))
 		str += ('%spi = top_instance;\n' % (tab))
@@ -164,7 +161,7 @@ def write_net_structure(str, instance, level, instance_index):
 			str += '%spi = pi->next;\n' % (tab)
 
 	#str += '%spn = pi->head_net;\n' % (tab)
-	
+
 	# primeiro net
 	str += ('%s// instance "%s" from class in "%s"\n' % (tab, instance['name'], instance['class']))
 	net = instance['nets'][0]
@@ -204,7 +201,7 @@ def report_area(lib, netlist):
 
 	with open(lib, "r") as fLib:
 		lines = fLib.readlines()
-	
+
 	dictAreas = {}
 	for line in lines:
 		splitLine = line.rstrip().split()
@@ -231,12 +228,12 @@ def report_area(lib, netlist):
 			if state == 1: # look for cell end
 				if "()" in line:
 					empty_output_flag = True
-				
+
 				if ";" in line:
 					if empty_output_flag is False:
 						area += cell_area_value
 					state = 0
-				
+
 	return area
 
 #----------------------------------------------------------------------------------------------------------------------
