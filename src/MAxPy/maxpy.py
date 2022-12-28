@@ -17,9 +17,10 @@ version = '0.0.1'
 
 from .utility import *
 
-#import resources
 from .resources import Resources
 from .synth import synth
+from .estimations import est_area, est_power_delay
+
 
 os.environ['PYBIND_LIBS'] = sysconfig.get_paths()['purelib'] + '/pybind11/include/'
 os.environ['VERI_FLAGS']  = '-O3 -shared -std=c++11 -fPIC $(python -m pybind11 --includes)'
@@ -177,10 +178,10 @@ class AxCircuit:
 					else:
 						self.synth_tool = None
 
-					self.get_area(self.netlist_target_path)
+					self.area = est_area(self.netlist_target_path, self.res.path_tech_lib)#self.get_area(self.netlist_target_path)
 					self.get_power_and_timing(self.netlist_target_path)
 		else:
-			self.get_area(f"{base}/{self.top_name}.v")
+			self.area = est_area(f"{base}/{self.top_name}.v", self.res.path_tech_lib)#self.get_area(f"{base}/{self.top_name}.v")
 			self.get_power_and_timing(f"{base}/{self.top_name}.v")
 
 		exit(0)
@@ -1131,9 +1132,9 @@ class AxCircuit:
 
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-	def get_area(self, netlist_path):
-		self.area = report_area(self.res.path_tech_lib, netlist_path)
-		print(f"  > Netlist estimated area = {self.area}")
+	# def get_area(self, netlist_path):
+	# 	self.area = report_area(self.res.path_tech_lib, netlist_path)
+	# 	print(f"  > Netlist estimated area = {self.area}")
 
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 	# OpenSTA methods
