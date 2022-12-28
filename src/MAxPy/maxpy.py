@@ -20,7 +20,7 @@ from .utility import *
 from .resources import Resources
 from .synth import synth
 from .estimations import est_area, est_power_timing
-
+from .verilate import verilate
 
 os.environ['PYBIND_LIBS'] = sysconfig.get_paths()['purelib'] + '/pybind11/include/'
 os.environ['VERI_FLAGS']  = '-O3 -shared -std=c++11 -fPIC $(python -m pybind11 --includes)'
@@ -189,6 +189,9 @@ class AxCircuit:
 		print(f"  > Netlist estimated area: {self.area:.3f}")
 		print(f"  > Netlist estimated power = {self.power:.3f} uW")
 		print(f"  > Netlist estimated maximum delay = {self.timing:.3f} nS")
+
+
+		verilate(self)
 
 		exit(0)
 
@@ -426,91 +429,91 @@ class AxCircuit:
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 	# veri2c
 
-	def veri2c(self):
-
-		print("> Verilator")
-
-		if remove_old_files(self.source_output_dir + '*') != 0:
-			return ErrorCodes.VERI2C_ERROR
-
-		if self.synth_opt==True:
-
-			#verilator_string =	os.environ.get('VERI_PATH') + ' ' \
-			verilator_string =	'verilator' + ' ' \
-								+ '-Wall -Wno-UNUSED -cc -O0 -top ' + self.top_name + ' ' \
-								+ '-Mdir ' + self.source_output_dir + ' ' \
-								+ self.verilator_config_path + ' ' \
-								+ self.base_path + ' ' \
-								+ self.library_path_v + ' ' \
-								+ self.axlib_path + ' ' \
-								+ '--prefix ' + self.class_name + ' ' \
-								+ '--mod-prefix sub'
-
-		else:
-
-			#verilator_string = 	os.environ.get('VERI_PATH') + ' ' \
-			verilator_string =	'verilator' + ' ' \
-								+ '-Wall -Wno-UNUSED -cc -top ' + self.top_name + ' ' \
-								+ '-Mdir ' + self.source_output_dir + ' ' \
-								+ self.verilator_config_path + ' ' \
-								+ self.base_path + ' ' \
-								+ self.library_path_v + ' ' \
-								+ self.axlib_path + ' ' \
-								+ '--prefix ' + self.class_name + ' ' \
-								+ '--mod-prefix sub'
-
-		print(verilator_string)
-
-
-		if self.vcd_opt == True:
-			verilator_string += ' --trace'
-
-		if self.clk_signal != '':
-			verilator_string += (' --clk ' + self.clk_signal)
-
-		if self.log_opt:
-			# create log file
-			log_filename = self.target_compile_dir  + ('log-veri2c_compile.txt')
-			#print('  > Creating log file: ' + log_filename)
-			log_file = open(log_filename, 'w')
-
-			# initial information in log file
-			log_file.write('MAxPy: VERILATOR LOG\n\n')
-			log_file.write('Command line:\n\n')
-			log_file.write(verilator_string)
-			log_file.write('\n\n')
-			log_file.write(get_time_stamp())
-			log_file.write('\n\n')
-			log_file.write('Terminal log:\n\n')
-
-			# close file and then open it again to avoid concurrency problems with subprocess call below
-			log_file.close()
-			# reopen log file as append
-			log_file = open(log_filename, 'a')
-
-		#print('  > Running verilation command')#: ' + verilator_string)
-
-		# execute compilation command as subprocess
-		if self.log_opt:
-			child = subprocess.Popen(verilator_string, stdout=log_file, stderr=subprocess.STDOUT, shell=True)
-		else:
-			child = subprocess.Popen(verilator_string, shell=True)
-
-		child.communicate()
-		error_code = child.wait()
-
-		if self.log_opt:
-			log_file.write('\n\n')
-			log_file.write(get_time_stamp())
-			log_file.write('\n\n')
-			log_file.close()
-
-		if error_code != 0:
-			ret_val = ErrorCodes.VERI2C_ERROR
-		else:
-			ret_val = ErrorCodes.OK
-
-		return ret_val
+	# def veri2c(self):
+ #
+	# 	print("> Verilator")
+ #
+	# 	if remove_old_files(self.source_output_dir + '*') != 0:
+	# 		return ErrorCodes.VERI2C_ERROR
+ #
+	# 	if self.synth_opt==True:
+ #
+	# 		#verilator_string =	os.environ.get('VERI_PATH') + ' ' \
+	# 		verilator_string =	'verilator' + ' ' \
+	# 							+ '-Wall -Wno-UNUSED -cc -O0 -top ' + self.top_name + ' ' \
+	# 							+ '-Mdir ' + self.source_output_dir + ' ' \
+	# 							+ self.verilator_config_path + ' ' \
+	# 							+ self.base_path + ' ' \
+	# 							+ self.library_path_v + ' ' \
+	# 							+ self.axlib_path + ' ' \
+	# 							+ '--prefix ' + self.class_name + ' ' \
+	# 							+ '--mod-prefix sub'
+ #
+	# 	else:
+ #
+	# 		#verilator_string = 	os.environ.get('VERI_PATH') + ' ' \
+	# 		verilator_string =	'verilator' + ' ' \
+	# 							+ '-Wall -Wno-UNUSED -cc -top ' + self.top_name + ' ' \
+	# 							+ '-Mdir ' + self.source_output_dir + ' ' \
+	# 							+ self.verilator_config_path + ' ' \
+	# 							+ self.base_path + ' ' \
+	# 							+ self.library_path_v + ' ' \
+	# 							+ self.axlib_path + ' ' \
+	# 							+ '--prefix ' + self.class_name + ' ' \
+	# 							+ '--mod-prefix sub'
+ #
+	# 	print(verilator_string)
+ #
+ #
+	# 	if self.vcd_opt == True:
+	# 		verilator_string += ' --trace'
+ #
+	# 	if self.clk_signal != '':
+	# 		verilator_string += (' --clk ' + self.clk_signal)
+ #
+	# 	if self.log_opt:
+	# 		# create log file
+	# 		log_filename = self.target_compile_dir  + ('log-veri2c_compile.txt')
+	# 		#print('  > Creating log file: ' + log_filename)
+	# 		log_file = open(log_filename, 'w')
+ #
+	# 		# initial information in log file
+	# 		log_file.write('MAxPy: VERILATOR LOG\n\n')
+	# 		log_file.write('Command line:\n\n')
+	# 		log_file.write(verilator_string)
+	# 		log_file.write('\n\n')
+	# 		log_file.write(get_time_stamp())
+	# 		log_file.write('\n\n')
+	# 		log_file.write('Terminal log:\n\n')
+ #
+	# 		# close file and then open it again to avoid concurrency problems with subprocess call below
+	# 		log_file.close()
+	# 		# reopen log file as append
+	# 		log_file = open(log_filename, 'a')
+ #
+	# 	#print('  > Running verilation command')#: ' + verilator_string)
+ #
+	# 	# execute compilation command as subprocess
+	# 	if self.log_opt:
+	# 		child = subprocess.Popen(verilator_string, stdout=log_file, stderr=subprocess.STDOUT, shell=True)
+	# 	else:
+	# 		child = subprocess.Popen(verilator_string, shell=True)
+ #
+	# 	child.communicate()
+	# 	error_code = child.wait()
+ #
+	# 	if self.log_opt:
+	# 		log_file.write('\n\n')
+	# 		log_file.write(get_time_stamp())
+	# 		log_file.write('\n\n')
+	# 		log_file.close()
+ #
+	# 	if error_code != 0:
+	# 		ret_val = ErrorCodes.VERI2C_ERROR
+	# 	else:
+	# 		ret_val = ErrorCodes.OK
+ #
+	# 	return ret_val
 
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 	# c2py-parse

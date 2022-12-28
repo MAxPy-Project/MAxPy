@@ -1,5 +1,4 @@
 import enum
-import subprocess
 import datetime
 import re
 
@@ -28,18 +27,6 @@ class ErrorCodes(enum.Enum):
     C2PY_COMPILE_ERROR = enum.auto()
     CHECKPYMOD_ERROR = enum.auto()
 
-def remove_old_files(path):
-    rm_old_files_string = "rm -f {path}".format(path=path)
-    child = subprocess.Popen(rm_old_files_string, shell=True)
-    child.communicate()
-    exit_code = child.wait()
-
-    # if exit_code == 0:
-    #     print('  > Removing files from last compilation... Ok!')
-    # else:
-    #     print('  > Removing files from last compilation... Error, return code %d' % exit_code)
-
-    return exit_code
 
 def get_time_stamp():
 	now = datetime.datetime.now()
