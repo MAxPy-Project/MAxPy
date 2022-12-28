@@ -5,17 +5,20 @@ import re
 import sysconfig
 import subprocess
 import itertools
-import importlib
+#import importlib
 import copy
 
-if sys.version_info < (3, 9):
-	import importlib_resources
-else:
-	import importlib.resources as importlib_resources
+# if sys.version_info < (3, 9):
+# 	import importlib_resources
+# else:
+# 	import importlib.resources as importlib_resources
 
 version = '0.0.1'
 
 from .utility import *
+
+#import resources
+from .resources import Resources
 
 os.environ['PYBIND_LIBS'] = sysconfig.get_paths()['purelib'] + '/pybind11/include/'
 os.environ['VERI_FLAGS']  = '-O3 -shared -std=c++11 -fPIC $(python -m pybind11 --includes)'
@@ -26,6 +29,8 @@ os.environ['VCD2SAIF_CDNS'] = '/lab215/tools/cadence/INCISIVE152/tools.lnx86/sim
 #------------------------------------------------------------------------------
 
 class AxCircuit:
+
+	res = Resources()
 
 	def __init__(self,
 		top_name="",
@@ -40,8 +45,12 @@ class AxCircuit:
 		):
 
 		# initial message
-		print(f"MAxPy - Version {version}")
-		print("")
+		print(f"MAxPy - Version {version}\n")
+
+		self.res.load_tech(tech)
+
+
+
 
 		self.top_name = top_name
 		self.tech = tech
@@ -51,22 +60,13 @@ class AxCircuit:
 		self.group_dir = group_dir
 		self.testbench_script = testbench_script
 		self.synth_tool = synth_tool
-		self.pwd = subprocess.Popen("pwd", shell=True, stdout=subprocess.PIPE).stdout.read().decode().strip('\n')
-		pkg = importlib_resources.files("MAxPy")
-		self.library_path_v = str(pkg / "pdk" / "NanGate15nm.v")
-		self.library_path_lib = str(pkg / "pdk" / "NanGate15nm.lib")
-		self.yosys_synth_template_path = str(pkg / "tcl" / "Yosys" / "synth.ys")
-		self.genus_synth_template_path = str(pkg / "tcl" / "Genus" / "synth.tcl")
-		self.verilator_config_path = str(pkg / "tcl" / "Verilator" / "verilator_config.vlt")
-		self.opensta_cmd_file_path = str(pkg / "tcl" / "OpenSTA" / "cmd_file.sta")
-		self.wrapper_cpp_template = str(pkg / "templates" / "verilator_pybind_wrapper.cpp")
-		self.wrapper_header_template = str(pkg / "templates" / "verilator_pybind_wrapper.h")
-		self.instance_cpp_template = str(pkg / "templates" / "instance_source.cpp")
-		self.axlib_path = str(pkg / "vlib" / "AxLib.v")
 		self.prob_pruning_threshold = 0
 		self.node_info = []
 		self.prun_flag = False
 		self.prun_netlist = False
+
+
+
 
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 	# getters and setters
@@ -181,6 +181,8 @@ class AxCircuit:
 		else:
 			self.get_area(f"{base}/{self.top_name}.v")
 			self.get_power_and_timing(f"{base}/{self.top_name}.v")
+
+		exit(0)
 
 		process_list = [
 			self.veri2c,
@@ -431,18 +433,22 @@ class AxCircuit:
 
 		if self.synth_tool == 'yosys':
 
-			file = open(self.yosys_synth_template_path,'r')
-			file_text = file.read()
-			file.close()
-			file_text = file_text.replace("[[RTLFILENAME]]", f"{self.axlib_path} {self.base_path}")
-			file_text = file_text.replace("[[LIBFILENAME]]", f"{self.library_path_v}")
+			#file = open(self.yosys_synth_template_path,'r')
+			#file_text = file.read()
+			#file.close()
+			file_text = self.res.template_yosys_synth
+			#file_text = file_text.replace("[[RTLFILENAME]]", f"{self.axlib_path} {self.base_path}")
+			file_text = file_text.replace("[[RTLFILENAME]]", f"{self.base_path}")
+			file_text = file_text.replace("[[LIBFILENAME]]", f"{self.res.path_tech_verilog}")
 			file_text = file_text.replace("[[TOPMODULE]]", self.top_name)
 			file_text = file_text.replace("[[NETLIST]]", self.netlist_target_path)
-			file_text = file_text.replace("[[LIBRARY]]", self.library_path_lib)
-			file_text = file_text.replace("[[LIBRARYABC]]", self.library_path_lib)
+			file_text = file_text.replace("[[LIBRARY]]", self.res.path_tech_lib)
+			file_text = file_text.replace("[[LIBRARYABC]]", self.res.path_tech_lib)
 			file = open('synth.ys',"w")
 			file.write(file_text)
 			file.close()
+			print(self.res.template_yosys_synth)
+			print(file_text)
 
 			# - - - - - - - - - - - - - - - Execute yosys - - - - - - - - - - - - - -
 
@@ -1276,7 +1282,7 @@ class AxCircuit:
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 	def get_area(self, netlist_path):
-		self.area = report_area(self.library_path_lib, netlist_path)
+		self.area = report_area(self.res.path_tech_lib, netlist_path)
 		print(f"  > Netlist estimated area = {self.area}")
 
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -1288,10 +1294,11 @@ class AxCircuit:
 		power_report_path = f"opensta_{self.top_name}_power.rpt"
 		timing_report_path = f"opensta_{self.top_name}_timing.rpt"
 
-		file_handle = open(self.opensta_cmd_file_path, "r")
-		cmd_file_text = file_handle.read()
-		file_handle.close()
-		cmd_file_text = cmd_file_text.replace("[[LIBRARY]]", self.library_path_lib)
+		#file_handle = open(self.opensta_cmd_file_path, "r")
+		#cmd_file_text = file_handle.read()
+		#file_handle.close()
+		cmd_file_text = self.res.template_opensta_cmd
+		cmd_file_text = cmd_file_text.replace("[[LIBRARY]]", self.res.path_tech_lib)
 		cmd_file_text = cmd_file_text.replace("[[NETLIST]]", netlist_path)
 		cmd_file_text = cmd_file_text.replace("[[TOPMODULE]]", self.top_name)
 		file_handle = open(sta_cmd_file_path, "w")
