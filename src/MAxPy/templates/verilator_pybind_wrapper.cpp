@@ -1,4 +1,4 @@
-// MAxPy [MAXPY_VERSION]]
+// MAxPy [[MAXPY_VERSION]]
 
 #include "verilator_pybind_wrapper.h"
 
@@ -110,10 +110,10 @@ MAxPy_[[CLASS_NAME]]::~MAxPy_[[CLASS_NAME]]() {
 void MAxPy_[[CLASS_NAME]]::eval() {
 
 	[[CLASS_NAME]]::eval();
-	
+
 	[[SAIF_OPT_IN]]main_time++;
 	eval_nets(top_instance);[[SAIF_OPT_OUT]]
-	
+
 	[[VCD_OPT_IN]]if(tfp)
 		tfp->dump(main_time);[[VCD_OPT_OUT]]
 }
@@ -130,7 +130,7 @@ void MAxPy_[[CLASS_NAME]]::eval() {
 		pn = pi->head_net;
 
 		while(pn != nullptr) {
-			
+
 			temp_n = pn->next;
 			delete pn;
 			pn = temp_n;
@@ -190,12 +190,12 @@ void MAxPy_[[CLASS_NAME]]::saif_on_the_fly(int reset = 0) {
 
 	file_handler = fopen(saif_path.c_str(), "w");
 
-	// saif header 
+	// saif header
 	fputs("(SAIFILE\n", file_handler);
 	fputs("(SAIFVERSION \"2.0\")\n", file_handler);
 	fputs("(DIRECTION \"backward\")\n", file_handler);
 	fputs("(DESIGN \"[[MODULE_NAME]]\"\n", file_handler);
-	fputs("(DATE \"08-14-2021 22:02:09\")\n", file_handler);	// #TODO: use system date and time 
+	fputs("(DATE \"08-14-2021 22:02:09\")\n", file_handler);	// #TODO: use system date and time
 	fputs("(VENDOR \"AxPy Inc\")\n", file_handler);
 	fputs("(PROGRAM_NAME \"open_autosaif\")\n", file_handler);
 	fputs("(VERSION \"v1\")\n", file_handler);
@@ -207,7 +207,7 @@ void MAxPy_[[CLASS_NAME]]::saif_on_the_fly(int reset = 0) {
 	if(top_instance) {
 		saif_print_instance(file_handler, top_instance, 0);
 	}
-	
+
 	fputs(")", file_handler);
 	fclose(file_handler);
 
@@ -233,13 +233,13 @@ void MAxPy_[[CLASS_NAME]]::saif_print_instance(FILE *file_handler, Instance *pi,
 
 	sprintf(s, "%s(INSTANCE %s\n", tab, pi->name);
 	fputs(s, file_handler);
-	
+
 	sprintf(s, "%s  (NET\n", tab);
 	fputs(s, file_handler);
 
 	pn = pi->head_net;
 	while(pn) {
-		
+
 		// net name
 		if(pn->bit_mask < 0x40) {
 			sprintf(s, "%s    (%s\\[%d\\]\n", tab, pn->name, pn->bit_mask);
@@ -254,7 +254,7 @@ void MAxPy_[[CLASS_NAME]]::saif_print_instance(FILE *file_handler, Instance *pi,
 		// times
 		sprintf(s, "%s      (T0 %d) (T1 %d) (TX %d)\n", tab, pn->t0, pn->t1, pn->tx);
 
-		
+
 		pn->perc_high = (float)pn->t1/(float)(main_time - 1) * 100.0;
 		pn->perc_low = (float)pn->t0/(float)(main_time - 1) * 100.0;
 

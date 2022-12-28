@@ -1,5 +1,6 @@
 from subprocess import Popen
 from .utility import ErrorCodes
+from .utility import get_time_stamp
 
 
 def verilate(axckt):
@@ -66,9 +67,9 @@ def verilate(axckt):
     child.communicate()
     error_code = child.wait()
 
-    # log_file.write('\n\n')
-    # log_file.write(get_time_stamp())
-    # log_file.write('\n\n')
+    log_file.write('\n\n')
+    log_file.write(get_time_stamp())
+    log_file.write('\n\n')
     log_file.close()
 
     if error_code != 0:
