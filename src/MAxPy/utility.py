@@ -193,49 +193,6 @@ def write_net_structure(str, instance, level, instance_index):
 
 	return str
 
-
-#----------------------------------------------------------------------------------------------------------------------
-#----------------------------------------------------------------------------------------------------------------------
-
-# def report_area(lib, netlist):
-#
-# 	with open(lib, "r") as fLib:
-# 		lines = fLib.readlines()
-#
-# 	dictAreas = {}
-# 	for line in lines:
-# 		splitLine = line.rstrip().split()
-# 		if len(splitLine) > 0:
-# 			if "cell" in splitLine[0]:
-# 				cellName = splitLine[1][1:-1]
-# 			elif "area" in splitLine[0]:
-# 				area = float(splitLine[2][:-1])
-# 				dictAreas[cellName] = area
-#
-# 	area = 0.0
-# 	state = 0
-# 	with open(netlist, "r") as fNetlist:
-# 		lines = fNetlist.readlines()
-# 		for line in lines:
-# 			if state == 0: # look for cell name
-# 				splitLine = line.rstrip().split()
-# 				if len(splitLine) > 0:
-# 					cell_type = splitLine[0]
-# 					if cell_type in dictAreas.keys():
-# 						cell_area_value = dictAreas[cell_type]
-# 						empty_output_flag = False
-# 						state = 1
-# 			if state == 1: # look for cell end
-# 				if "()" in line:
-# 					empty_output_flag = True
-#
-# 				if ";" in line:
-# 					if empty_output_flag is False:
-# 						area += cell_area_value
-# 					state = 0
-#
-# 	return area
-
 #----------------------------------------------------------------------------------------------------------------------
 #	eof
 #----------------------------------------------------------------------------------------------------------------------

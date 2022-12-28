@@ -19,7 +19,7 @@ from .utility import *
 
 from .resources import Resources
 from .synth import synth
-from .estimations import est_area, est_power_delay
+from .estimations import est_area, est_power_timing
 
 
 os.environ['PYBIND_LIBS'] = sysconfig.get_paths()['purelib'] + '/pybind11/include/'
@@ -178,11 +178,17 @@ class AxCircuit:
 					else:
 						self.synth_tool = None
 
-					self.area = est_area(self.netlist_target_path, self.res.path_tech_lib)#self.get_area(self.netlist_target_path)
-					self.get_power_and_timing(self.netlist_target_path)
+					self.working_netlist = self.netlist_target_path
+
 		else:
-			self.area = est_area(f"{base}/{self.top_name}.v", self.res.path_tech_lib)#self.get_area(f"{base}/{self.top_name}.v")
-			self.get_power_and_timing(f"{base}/{self.top_name}.v")
+			self.working_netlist = f"{base}/{self.top_name}.v"
+
+		est_area(self)
+		est_power_timing(self)
+
+		print(f"  > Netlist estimated area: {self.area:.3f}")
+		print(f"  > Netlist estimated power = {self.power:.3f} uW")
+		print(f"  > Netlist estimated maximum delay = {self.timing:.3f} nS")
 
 		exit(0)
 
@@ -1128,105 +1134,6 @@ class AxCircuit:
 		self.parent_list = self.parent_list[:-1]
 
 		return method_list
-
-
-	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-	# def get_area(self, netlist_path):
-	# 	self.area = report_area(self.res.path_tech_lib, netlist_path)
-	# 	print(f"  > Netlist estimated area = {self.area}")
-
-	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-	# OpenSTA methods
-
-	def get_power_and_timing(self, netlist_path):
-
-		sta_cmd_file_path = "cmd_file.sta"
-		power_report_path = f"opensta_{self.top_name}_power.rpt"
-		timing_report_path = f"opensta_{self.top_name}_timing.rpt"
-
-		#file_handle = open(self.opensta_cmd_file_path, "r")
-		#cmd_file_text = file_handle.read()
-		#file_handle.close()
-		cmd_file_text = self.res.template_opensta_cmd
-		cmd_file_text = cmd_file_text.replace("[[LIBRARY]]", self.res.path_tech_lib)
-		cmd_file_text = cmd_file_text.replace("[[NETLIST]]", netlist_path)
-		cmd_file_text = cmd_file_text.replace("[[TOPMODULE]]", self.top_name)
-		file_handle = open(sta_cmd_file_path, "w")
-		file_handle.write(cmd_file_text)
-		file_handle.close()
-		sta_string = "sta cmd_file.sta"
-
-		if self.log_opt:
-			# create log file
-			log_filename = self.target_compile_dir  + ('log-opensta.txt')
-			log_file = open(log_filename, 'w')
-
-			# initial information in log file
-			log_file.write('MAxPy: OpenSTA LOG\n\n')
-			log_file.write('Command line:\n\n')
-			log_file.write(sta_string)
-			log_file.write('\n\n')
-			log_file.write(get_time_stamp())
-			log_file.write('\n\n')
-			log_file.write('Terminal log:\n\n')
-			log_file.close()					# close file and then open it again to avoid concurrency problems with subprocess call below
-			log_file = open(log_filename, 'a')	# reopen log file as append
-
-		if self.log_opt:
-			child = subprocess.Popen(sta_string, stdout=log_file, stderr=subprocess.STDOUT, shell=True)
-		else:
-			child = subprocess.Popen(sta_string, shell=True)
-
-		child.communicate()
-		child.wait()
-
-		if self.log_opt:
-			log_file.write('\n\n')
-			log_file.write(get_time_stamp())
-			log_file.write('\n\n')
-			log_file.close()
-
-		# get power report
-		file_handle = open(power_report_path, "r")
-		power_report_lines = file_handle.readlines()
-		file_handle.close()
-		self.power = 0.0
-		for line in power_report_lines:
-			line_items = line.rsplit()
-			if len(line_items) < 1:
-				continue
-			if line_items[0] == "Total":
-				self.power = float(line_items[4])
-				break
-
-		# get timing report
-		file_handle = open(timing_report_path, "r")
-		timing_report_lines = file_handle.readlines()
-		file_handle.close()
-		self.timing = 0.0
-		if len(timing_report_lines) >= 3:
-			data_line = timing_report_lines[2].rsplit()
-			try:
-				self.timing = float(data_line[-1])
-			except:
-				self.timing = 0.0
-
-		print(f"  > Netlist estimated power = {self.power} W")
-		print(f"  > Netlist estimated maximum delay = {self.timing} nS")
-
-		os.remove(sta_cmd_file_path)
-		os.remove(power_report_path)
-		os.remove(timing_report_path)
-
-		self.power *= 1e6 # convert to uWatts
-
-
-#----------------------------------------------------------------------------------------------------------------------
-#----------------------------------------------------------------------------------------------------------------------
-
-
-
 
 
 #----------------------------------------------------------------------------------------------------------------------
