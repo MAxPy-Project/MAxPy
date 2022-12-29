@@ -36,7 +36,6 @@ def compile(axckt):
         pybind_string = \
             'c++' + ' ' \
             + os.environ.get('VERI_FLAGS') + ' ' \
-            +'-I' + os.environ.get('PYBIND_LIBS') + ' ' \
             +'-I' + os.environ.get('VERI_LIBS') + ' ' \
             + os.environ.get('VERI_LIBS') + 'verilated.cpp' + ' ' \
             + os.environ.get('VERI_LIBS') + 'verilated_vcd_c.cpp' + ' ' \
@@ -46,13 +45,10 @@ def compile(axckt):
         pybind_string = \
             'c++' + ' ' \
             + os.environ.get('VERI_FLAGS') + ' ' \
-            +'-I' + os.environ.get('PYBIND_LIBS') + ' ' \
             +'-I' + os.environ.get('VERI_LIBS') + ' ' \
             + axckt.source_output_dir  + '*.cpp' + ' ' \
             + os.environ.get('VERI_LIBS') + 'verilated.cpp' + ' ' \
             +'-o ' + axckt.compiled_module_path
-
-
 
     # create log file
     log_path = f"{axckt.target_compile_dir}compile.log"
