@@ -54,7 +54,7 @@ def verilate(axckt):
     log_file = open(log_path, "w")
 
     # initial information in log file
-    log_file.write("MAxPy: OpenSTA LOG\n\n")
+    log_file.write("MAxPy: VERILATOR LOG\n\n")
     log_file.write(f"Command line:\n\n{verilator_string}\n\n")
     log_file.write("Log from stdout and stderr:\n\n")
     # close file and then open it again to avoid concurrency problems with subprocess call below
