@@ -38,7 +38,7 @@ def verilate(axckt):
 
                         #+ axckt.axlib_path + ' ' \
 
-    print(verilator_string)
+    #print(verilator_string)
 
 
     if axckt.vcd_opt is True:
