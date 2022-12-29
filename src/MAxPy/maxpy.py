@@ -22,6 +22,7 @@ from .estimations import est_area, est_power_timing
 from .verilate import verilate
 from .wrapper import wrapper
 from .compile import compile
+from .check import check
 
 
 
@@ -189,9 +190,23 @@ class AxCircuit:
 		print(f"  > Netlist estimated maximum delay = {self.timing:.3f} nS")
 
 
-		verilate(self)
-		wrapper(self)
-		compile(self)
+		if verilate(self) is not ErrorCodes.OK:
+			print("error")
+			exit(1)
+
+		if wrapper(self) is not ErrorCodes.OK:
+			print("error")
+			exit(1)
+
+		if compile(self) is not ErrorCodes.OK:
+			print("error")
+			exit(1)
+
+		if check(self) is not ErrorCodes.OK:
+			print("error")
+			exit(1)
+
+		print("ok")
 
 		exit(0)
 
@@ -431,28 +446,7 @@ class AxCircuit:
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 	# checkpymod
 
-	def checkpymod (self):
 
-		print("> Module check (should print module\'s name)")
-
-		#print('  > Runnin test script (should print module\'s name):')
-
-		module_test_string = "python -c \""
-		module_test_string += "from {m} import {n};".format(m=self.pymod_path, n=self.top_name)
-		module_test_string += "print('  >', %s.%s().name())\"" % (self.top_name, self.top_name)
-
-		#print(module_test_string)
-
-		child = subprocess.Popen(module_test_string, shell=True)
-		child.communicate()
-		error_code = child.wait()
-
-		if error_code != 0:
-			ret_val = ErrorCodes.CHECKPYMOD_ERROR
-		else:
-			ret_val = ErrorCodes.OK
-
-		return ret_val
 
 
 

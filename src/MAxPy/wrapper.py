@@ -3,6 +3,7 @@ from .utility import get_time_stamp
 from .utility import version
 from .utility import ErrorCodes
 import re
+import os
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -150,7 +151,7 @@ def wrapper(axckt):
     file_text = file_text.replace("[[HEADER_INCLUDE]]", include_str)
     file_text = file_text.replace("[[MODULE_NAME]]", axckt.top_name)
     file_text = file_text.replace("[[CLASS_NAME]]", axckt.class_name)
-    file_text = file_text.replace("[[VERILATOR_PATH]]", "/usr/share/verilator/include/")    #TODO!!!
+    file_text = file_text.replace("[[VERILATOR_PATH]]", os.environ.get('VERI_LIBS'))
     file_text = file_text.replace("[[GETTERS_AND_SETTERS_DECLARATION]]", getters_and_setters_declaration)
 
     if axckt.vcd_opt:
