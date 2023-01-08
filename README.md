@@ -17,11 +17,12 @@
   * bison
   * flex
   * pip
-  
+  * ninja
+
 * Python packages:
   * build
   * matplotlib
-  
+
 ```sh
 python -m pip install --upgrade build
 pip install matplotlib
@@ -41,24 +42,33 @@ https://github.com/The-OpenROAD-Project/OpenSTA
 
 * Verilator
 https://github.com/verilator/verilator
+```sh
 sudo pacman -S verilator
+```
 
 * Pybind11
 https://github.com/pybind/pybind11
+```sh
 sudo pacman -S pybind11
+```
 
 
 
 ### First time: cloning package repository
 
-* git clone https://github.com/ysba/maxpy
+```sh
+git clone https://github.com/ysba/maxpy
+```
 
 ### Installing
 
-* cd maxpy
-* python -m build
-* pip install --force-reinstall dist/maxpy-x.x.x-py3-none-any.whl
+```sh
+cd maxpy
+python -m build
+pip install --force-reinstall dist/maxpy-x.x.x-py3-none-any.whl
+```
 
 ### Running test script
-
-* python tests/test.py
+``` sh
+python tests/test.py
+```
