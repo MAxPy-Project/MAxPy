@@ -46,6 +46,11 @@ class Resources:
     with open(path, "r") as f:
         template_instance_source = f.read()
 
+    path = str(pkg / "templates" / "cmake_pybind.txt")
+    with open(path, "r") as f:
+        template_cmake_pybind = f.read()
+
+
     # load paths
     verilator_config_path = str(pkg / "tcl" / "Verilator" / "verilator_config.vlt")
 

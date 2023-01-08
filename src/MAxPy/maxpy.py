@@ -201,7 +201,7 @@ class AxCircuit:
 		if compile(self) is not ErrorCodes.OK:
 			print("error")
 			exit(1)
-
+  #
 		if check(self) is not ErrorCodes.OK:
 			print("error")
 			exit(1)
