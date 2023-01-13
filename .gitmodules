@@ -1,0 +1,3 @@
+[submodule "src/MAxPy/vlib/AxArith"]
+	path = src/MAxPy/vlib/AxArith
+	url = https://github.com/ysba/AxArith

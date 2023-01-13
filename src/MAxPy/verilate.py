@@ -20,10 +20,10 @@ def verilate(axckt):
                             + axckt.res.verilator_config_path + ' ' \
                             + axckt.base_path + ' ' \
                             + axckt.res.path_tech_verilog + ' ' \
+                            + axckt.res.axarith_path + '/adders/*.v ' \
                             + '--prefix ' + axckt.class_name + ' ' \
                             + '--mod-prefix sub'
 
-                        #+ axckt.axlib_path + ' ' \
 
     else:
 
@@ -33,10 +33,10 @@ def verilate(axckt):
                             + axckt.res.verilator_config_path + ' ' \
                             + axckt.base_path + ' ' \
                             + axckt.res.path_tech_verilog + ' ' \
+                            + axckt.res.axarith_path + '/adders/*.v ' \
                             + '--prefix ' + axckt.class_name + ' ' \
                             + '--mod-prefix sub'
 
-                        #+ axckt.axlib_path + ' ' \
 
     #print(verilator_string)
 

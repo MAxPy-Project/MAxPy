@@ -54,6 +54,8 @@ class Resources:
     # load paths
     verilator_config_path = str(pkg / "tcl" / "Verilator" / "verilator_config.vlt")
 
+    axarith_path = str(pkg / "vlib" / "AxArith")
+
     pwd = subprocess.Popen("pwd", shell=True, stdout=subprocess.PIPE).stdout.read().decode().strip('\n')
 
 
