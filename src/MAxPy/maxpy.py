@@ -4,18 +4,11 @@ import sys
 import re
 import sysconfig
 import subprocess
+import importlib
 import itertools
-#import importlib
 import copy
 
-# if sys.version_info < (3, 9):
-# 	import importlib_resources
-# else:
-# 	import importlib.resources as importlib_resources
-
-
 from .utility import *
-
 from .resources import Resources
 from .synth import synth
 from .estimations import est_area, est_power_timing
@@ -25,10 +18,6 @@ from .compile import compile
 from .check import check
 
 
-
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-
 class AxCircuit:
 
 	res = Resources()
@@ -36,7 +25,6 @@ class AxCircuit:
 	def __init__(self,
 		top_name="",
 		tech="NanGate15nm",
-		synth_tool=None,
 		xml_opt="verilator",
 		clk_signal="",
 		group_dir="",
@@ -57,7 +45,6 @@ class AxCircuit:
 		self.parameters = {}
 		self.group_dir = group_dir
 		self.testbench_script = testbench_script
-		self.synth_tool = synth_tool
 		self.prob_pruning_threshold = 0
 		self.node_info = []
 		self.prun_flag = False
@@ -65,6 +52,7 @@ class AxCircuit:
 		self.saif_opt = True
 		self.vcd_opt = False
 		self.log_opt = True
+		self.synth_tool = None
 
 
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -94,6 +82,8 @@ class AxCircuit:
 
 		if base == "":
 			base = "rtl"
+
+
 
 		if target == "":
 			target = "level_00"
@@ -241,8 +231,8 @@ class AxCircuit:
 
 				err = self.rtl2py(base=base, target=target)
 
-				#if err is ErrorCodes.OK:
-				#	self.testbench()
+				if err is ErrorCodes.OK:
+					self.testbench()
 
 			except FileExistsError:
 				print(f">>> Skipping combination \"{s}\" because it already exists (dir: {base}")
@@ -252,12 +242,11 @@ class AxCircuit:
 
 
 	def testbench(self):
-
 		if self.testbench_script is not None:
 			print("> Testbench init")
 			mod_name = f"{self.pymod_path}.{self.top_name}"
 			mod = importlib.import_module(mod_name, package=None)
-			self.prun_flag, self.node_info = self.testbench_script(mod, f"{self.target_compile_dir}log-testbench.txt", True)
+			self.prun_flag, self.node_info = self.testbench_script(mod)
 			print("> Testbench end\n")
 			return ErrorCodes.OK
 

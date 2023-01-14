@@ -15,6 +15,7 @@ circuit.rtl2py(target="exact_yosys")
 
 # parameter substituition loop "study no 1"
 circuit.set_group("study_no_1")
+circuit.set_synth_tool(None)
 circuit.parameters = {
     "[[PARAM_K]]": ["1","2"],
     "[[PARAM_ADDER01]]": ["copyA","copyB"],
