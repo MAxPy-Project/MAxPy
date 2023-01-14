@@ -50,9 +50,6 @@ class AxCircuit:
 
 		self.res.load_tech(tech)
 
-
-
-
 		self.top_name = top_name
 		self.tech = tech
 		self.xml_opt = xml_opt
@@ -65,8 +62,9 @@ class AxCircuit:
 		self.node_info = []
 		self.prun_flag = False
 		self.prun_netlist = False
-
-
+		self.saif_opt = True
+		self.vcd_opt = False
+		self.log_opt = True
 
 
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -92,22 +90,10 @@ class AxCircuit:
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-	def rtl2py(
-		self,
-		base="",
-		target="",
-		area_estimation=True,
-		log_opt=True,
-		vcd_opt=False,
-		saif_opt=True,
-		):
-
-		self.vcd_opt = vcd_opt
-		self.log_opt = log_opt
-		self.saif_opt = saif_opt
+	def rtl2py(self, base="", target=""):
 
 		if base == "":
-			base = 'rtl'
+			base = "rtl"
 
 		if target == "":
 			target = "level_00"
@@ -131,16 +117,16 @@ class AxCircuit:
 		else:
 			self.synth_opt = False
 
-		if area_estimation is True and self.synth_opt is False:
+		if self.synth_opt is False:
 			self.synth_tool = "yosys"
 
 		self.base_path = f"{base}/*.v"
 		if self.group_dir == "":
-			self.target_compile_dir = f"{self.top_name}_{target}_build/"
-			self.pymod_path = f"{self.top_name}_{target}_build"
+			self.target_compile_dir = f"{self.top_name}_{target}/"
+			self.pymod_path = f"{self.top_name}_{target}"
 		else:
-			self.target_compile_dir = f"{self.group_dir}/{self.top_name}_{target}_build/"
-			self.pymod_path = f"{self.group_dir}.{self.top_name}_{target}_build"
+			self.target_compile_dir = f"{self.group_dir}/{self.top_name}_{target}/"
+			self.pymod_path = f"{self.group_dir}.{self.top_name}_{target}"
 		self.target_netlist_dir = "{t}netlist_{s}/".format(t=self.target_compile_dir, s=self.synth_tool)
 		self.source_output_dir = "{t}source/".format(t=self.target_compile_dir)
 
@@ -153,9 +139,7 @@ class AxCircuit:
 
 		os.makedirs(self.target_compile_dir, exist_ok = True)
 		os.makedirs(self.source_output_dir, exist_ok = True)
-
-		if self.synth_opt is True or area_estimation is True:
-			os.makedirs(self.target_netlist_dir, exist_ok = True)
+		os.makedirs(self.target_netlist_dir, exist_ok = True)
 
 		self.trace_levels = 99  ##TODO: ???
 
@@ -163,23 +147,22 @@ class AxCircuit:
 		self.power = 0.0
 		self.timing = 0.0
 
-		# synth: synthesize RTL file (optional)
+		# synth: synthesize RTL file
 		if self.prun_netlist is False:
-			if self.synth_opt is True or area_estimation is True:
-				ret_val = synth(self)
-				#print("  > End\n")
-				if ret_val is not ErrorCodes.OK:
-					print(">>> End: " + get_time_stamp())
-					print(">>> MAxPy ERROR: synth process exited with error code \"{error}\". Please check log files".format(error=ret_val))
-					return ret_val
-				else:
-					if self.synth_opt is True:
-						self.base_path = self.netlist_target_path
-					else:
-						self.synth_tool = None
+			err = synth(self)
 
-					self.working_netlist = self.netlist_target_path
+			if self.synth_opt is False:
+				self.synth_tool = None
 
+			if err is not ErrorCodes.OK:
+				print(">>> End: " + get_time_stamp())
+				print(">>> MAxPy ERROR: synth process exited with error code \"{error}\". Please check log files".format(error=err))
+				return err
+			else:
+				if self.synth_opt is True:
+					self.base_path = self.netlist_target_path
+
+				self.working_netlist = self.netlist_target_path
 		else:
 			self.working_netlist = f"{base}/{self.top_name}.v"
 
@@ -189,7 +172,6 @@ class AxCircuit:
 		print(f"  > Netlist estimated area: {self.area:.3f}")
 		print(f"  > Netlist estimated power = {self.power:.3f} uW")
 		print(f"  > Netlist estimated maximum delay = {self.timing:.3f} nS")
-
 
 		task_list = [
 			verilate,
@@ -212,11 +194,10 @@ class AxCircuit:
 
 		return ErrorCodes.OK
 
-
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 
-	def rtl2py_param_loop(self, base = '', area_estimation=True, saif_opt=True):
+	def rtl2py_param_loop(self, base = ""):
 
 		# change variable parameters in rtl source file
 		file =  open(f"{base}/{self.top_name}.v", 'r')
@@ -246,10 +227,9 @@ class AxCircuit:
 				s = s + "_" +  self.synth_tool
 
 			if self.group_dir == "":
-				base = f"{self.top_name}_{s}_rtl"
+				base = f"{self.top_name}_{s}/rtl"
 			else:
-				base = f"{self.group_dir}/{self.top_name}_{s}_rtl"
-			#os.makedirs(base, exist_ok = True)
+				base = f"{self.group_dir}/{self.top_name}_{s}/rtl"
 
 			try:
 				os.makedirs(base)
@@ -259,14 +239,9 @@ class AxCircuit:
 				file.write(rtl_source_edit)
 				file.close()
 
-				ret_val = self.rtl2py(
-					base=base,
-					target=target,
-					area_estimation=area_estimation,
-					saif_opt=saif_opt
-				)
+				err = self.rtl2py(base=base, target=target)
 
-				#if ret_val is ErrorCodes.OK:
+				#if err is ErrorCodes.OK:
 				#	self.testbench()
 
 			except FileExistsError:
@@ -397,11 +372,11 @@ class AxCircuit:
 				target = target + "_" +  self.synth_tool
 
 			if self.group_dir == "":
-				self.target_compile_dir = f"{self.top_name}_{target}_build/"
-				self.pymod_path = f"{self.top_name}_{target}_build"
+				self.target_compile_dir = f"{self.top_name}_{target}/"
+				self.pymod_path = f"{self.top_name}_{target}"
 			else:
-				self.target_compile_dir = f"{self.group_dir}/{self.top_name}_{target}_build/"
-				self.pymod_path = f"{self.group_dir}.{self.top_name}_{target}_build"
+				self.target_compile_dir = f"{self.group_dir}/{self.top_name}_{target}/"
+				self.pymod_path = f"{self.group_dir}.{self.top_name}_{target}"
 
 			self.target_netlist_dir = "{t}netlist_{s}/".format(t=self.target_compile_dir, s=self.synth_tool)
 			self.netlist_target_path = "{d}{c}.v".format(d=self.target_netlist_dir, c=self.top_name)

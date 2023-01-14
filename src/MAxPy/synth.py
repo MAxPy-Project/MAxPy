@@ -19,8 +19,7 @@ def synth(axckt):
 
     if axckt.synth_tool == "yosys":
         file_text = axckt.res.template_yosys_synth
-        #file_text = file_text.replace("[[RTLFILENAME]]", f"{self.axlib_path} {self.base_path}") #TODO!
-        file_text = file_text.replace("[[RTLFILENAME]]", f"{axckt.base_path}")
+        file_text = file_text.replace("[[RTLFILENAME]]", f"{axckt.res.axarith_path}/*/*.v {axckt.base_path}")
         file_text = file_text.replace("[[LIBFILENAME]]", axckt.res.path_tech_verilog)
         file_text = file_text.replace("[[TOPMODULE]]", axckt.top_name)
         file_text = file_text.replace("[[NETLIST]]", axckt.netlist_target_path)
