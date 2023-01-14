@@ -117,10 +117,11 @@ class AxCircuit:
 
 		self.class_name = f"{self.top_name}_{target}"
 
-		print(f">>> Converting Verilog RTL design \"{self.top_name}\" into Python module, base \"{base}\", target \"{target}\"")
+		print("------------------------------------------------------------------------------------")
+		print(f">>> MAxPy rtl2py: converting Verilog RTL design \"{self.top_name}\" into Python module")
+		print(f"> Base \"{base}\", Target \"{target}\"")
 
-		print(">>> Start: " + get_time_stamp())
-		print("")
+		print("> Start: " + get_time_stamp())
 
 		if self.synth_tool is not None:
 			if self.synth_tool in self.res.synth_tools:
@@ -190,49 +191,24 @@ class AxCircuit:
 		print(f"  > Netlist estimated maximum delay = {self.timing:.3f} nS")
 
 
-		if verilate(self) is not ErrorCodes.OK:
-			print("error")
-			exit(1)
-
-		if wrapper(self) is not ErrorCodes.OK:
-			print("error")
-			exit(1)
-
-		if compile(self) is not ErrorCodes.OK:
-			print("error")
-			exit(1)
-  #
-		if check(self) is not ErrorCodes.OK:
-			print("error")
-			exit(1)
-
-		print("ok")
-
-		exit(0)
-
-		process_list = [
-			self.veri2c,
-			self.c2py_parse,
-			self.c2py_compile,
-			self.checkpymod,
-			self.testbench
+		task_list = [
+			verilate,
+			wrapper,
+			compile,
+			check
 		]
 
-		#process_list = [self.c2py_compile]
+		for task in task_list:
+			err = task(self)
+			if err is not ErrorCodes.OK:
+				print("> End: " + get_time_stamp())
+				print(f">>> Error converting circuit \"{self.top_name}\"! (code: {err})")
+				print("")
+				return err
 
-		for process in process_list:
-			ret_val = process()
-			#print("  > End\n")
-			if ret_val is not ErrorCodes.OK:
-				print(">>> End: " + get_time_stamp())
-				print(">>> MAxPy ERROR: process exited with error code \"{error}\". Please check log files".format(error=ret_val))
-				return ret_val
-
+		print("> End: " + get_time_stamp())
+		print(">>> Circuit \"{t}\" converted successfully!".format(t=self.top_name))
 		print("")
-		print(">>> End: " + get_time_stamp())
-		print(">>> Circuit \"{t}\" compiled successfully!".format(t=self.top_name))
-		print("")
-
 
 		return ErrorCodes.OK
 
