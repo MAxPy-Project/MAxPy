@@ -1,5 +1,5 @@
 `verilator_config
-//lint_off -rule EOFNEWLINE
+lint_off -rule EOFNEWLINE
 lint_off -rule DECLFILENAME
 lint_off -rule WIDTH
 lint_off -rule CMPCONST
