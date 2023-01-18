@@ -19,7 +19,6 @@ from .check import check
 
 
 class AxCircuit:
-
 	res = Resources()
 
 	def __init__(self,
@@ -79,7 +78,6 @@ class AxCircuit:
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 	def rtl2py(self, base="", target=""):
-
 		if base == "":
 			base = "rtl"
 
@@ -188,7 +186,6 @@ class AxCircuit:
 
 
 	def rtl2py_param_loop(self, base = ""):
-
 		# change variable parameters in rtl source file
 		file =  open(f"{base}/{self.top_name}.v", 'r')
 		rtl_source_original = file.read()
@@ -254,7 +251,6 @@ class AxCircuit:
 
 
 	def probprun(self, base, prun_level):
-
 		print(f"> Probabilistic pruning (level {prun_level}%)")
 		print(f"  > Original netlist: {self.netlist_target_path}")
 
@@ -339,7 +335,6 @@ class AxCircuit:
 
 
 	def testbench_param_loop(self):
-
 		if self.testbench_script is None:
 			print("Error! Testbench script is None!\n")
 			return
@@ -372,27 +367,3 @@ class AxCircuit:
 			self.current_parameter = target
 
 			self.testbench()
-
-
-	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-	# c2py-parse
-
-
-	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-	# c2py-compile
-
-
-
-	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-	# checkpymod
-
-
-
-
-
-
-
-
-#----------------------------------------------------------------------------------------------------------------------
-#	end of file
-#----------------------------------------------------------------------------------------------------------------------
