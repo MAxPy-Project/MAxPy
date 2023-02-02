@@ -1,4 +1,4 @@
-from MAxPy import *
+from MAxPy import maxpy
 from testbench import testbench_run
 
 circuit = maxpy.AxCircuit(top_name="adder4")#, synth_overwrite = True)

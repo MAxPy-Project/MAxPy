@@ -16,6 +16,7 @@ from .verilate import verilate
 from .wrapper import wrapper
 from .compile import compile
 from .check import check
+from .results import ResultsTable
 
 
 class AxCircuit:
@@ -52,7 +53,7 @@ class AxCircuit:
 		self.vcd_opt = False
 		self.log_opt = True
 		self.synth_tool = None
-
+		self.result_table = None
 
 	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 	# getters and setters
@@ -367,3 +368,9 @@ class AxCircuit:
 			self.current_parameter = target
 
 			self.testbench()
+
+	# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+
+	def create_result_table(self, filepath, quality_metrics):
+		self.result_table = ResultsTable(filepath, quality_metrics)
