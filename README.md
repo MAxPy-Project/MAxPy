@@ -22,6 +22,7 @@
 * Python packages:
   * build
   * matplotlib
+  * pandas
 
 ```sh
 python -m pip install --upgrade build
