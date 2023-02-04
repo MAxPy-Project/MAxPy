@@ -26,3 +26,4 @@ circuit.rtl2py_param_loop(base="rtl_param")
 
 # generate pareto frontier
 circuit.get_pareto_front("area", "mre")
+circuit.get_pareto_front("area", "mse")
