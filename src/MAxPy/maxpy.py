@@ -404,11 +404,15 @@ class AxCircuit:
         with open(pareto_filename, "w") as pareto_file:
             print(f"> Saving pareto list into file: {pareto_filename}")
             pareto_file.write("\n".join(x for x in pareto_elements))
-
-        #figure = plt.plot()
         plt.scatter(x_data, y_data, color="blue", marker=".", label="_nolegend_")
         plt.scatter(x_pareto, y_pareto, 200, color="red", edgecolors="black", marker="*", label="_nolegend_")
         plt.plot(x_pareto, y_pareto, color='black', marker='.', linewidth=3, markersize=1, zorder=0)
         plt.xlabel(x_name)
         plt.ylabel(y_name)
+        if self.group_dir == "":
+            pareto_image= f"pareto_{x_name}_{y_name}.pdf"
+        else:
+            pareto_image= f"{self.group_dir}/pareto_{x_name}_{y_name}.pdf"
+        plt.savefig(pareto_image)
+        plt.savefig(pareto_image.replace(".pdf", ".png"))
         plt.show()
