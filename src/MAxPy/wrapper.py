@@ -257,6 +257,7 @@ def look4nets(axckt, text, skip_ports):
     private_flag = 0
     ports_flag = 0
     local_signals_flag = 0
+    design_specific_state_flag = 0
     for line in text:
         line = line.strip(' \t\n\r')
         if line.find('private') == 0:
@@ -269,9 +270,15 @@ def look4nets(axckt, text, skip_ports):
         if line.find('// PORTS') == 0 and skip_ports is False:
             ports_flag = 1
             local_signals_flag = 0
+            design_specific_state_flag = 0
         elif line.find('// LOCAL SIGNALS') == 0:
             local_signals_flag = 1
             ports_flag = 0
+            design_specific_state_flag = 0
+        elif line.find('// DESIGN SPECIFIC STATE') == 0:
+            local_signals_flag = 0
+            ports_flag = 0
+            design_specific_state_flag = 1
         elif line.find('// LOCAL VARIABLES') == 0:
             local_signals_flag = 0
             ports_flag = 0
@@ -358,59 +365,37 @@ def look4nets(axckt, text, skip_ports):
                 #else:
                 #	print('    port[name: %s (%s), size: %s[%d][%d:%d]] << %s >>' % (name, direction, size, array, msb, lsb, line))
 
-        elif local_signals_flag:
+        elif local_signals_flag or design_specific_state_flag:
             if 'CData' in line or 'SData' in line or 'IData' in line or 'WData' in line:
-
                 name = line.split()[1].replace(';', '')
-
                 if '[' in name:
-
                     ##TODO: add binding code for arrays
                     #name = name[:name.index('[')]
                     continue
-
                 if '>' in name:
                     #when type contains VlUnpacked directive
                     name = line.split()[2].replace(';','')
-
                 name = name.replace('&', '')
-
                 local_parent = []
                 for parent in axckt.parent_list:
                     local_parent.append(parent)
-
                 short_name = name
-
-                if short_name.find(axckt.top_name) == 0:
-                    short_name = short_name.replace(axckt.top_name, '')
-
-                if '__' in short_name:
-                    short_name = short_name.replace('__', '')
-
-                if 'PVT' in short_name:
-                    short_name = short_name.replace('PVT', '')
-
-                if 'DOT' in short_name:
-                    short_name = short_name.replace('DOT', '')
-
-                if 'F1' in short_name:
-                    short_name = short_name.replace('F1', '')
-
-                if 'DIV' in short_name:
-                    short_name = short_name.replace('DIV', '')
-
-                if 'dut' in short_name:
-                    short_name = short_name.replace('dut', '')
-
-                if '&' in short_name:
-                    short_name = short_name.replace('&', '')
-
+                replace_list = [
+                        axckt.top_name,
+                        "__",
+                        "PVT",
+                        "DOT",
+                        "F1",
+                        "DIV",
+                        "dut",
+                        "&",
+                        "Vcellinp",
+                        "Vcellout"
+                    ]
+                for item2replace in replace_list:
+                    short_name = short_name.replace(item2replace, "")
                 net = {'name': name, 'bit_mask': 0x40, 'short_name': short_name, 'parent': local_parent}
-
-
                 net_list.append(net)
-
-
     return net_list
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
