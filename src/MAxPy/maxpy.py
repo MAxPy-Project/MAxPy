@@ -95,8 +95,6 @@ class AxCircuit:
         if base == "":
             base = "rtl"
 
-
-
         if target == "":
             target = "level_00"
             self.current_parameter = ""
@@ -243,16 +241,16 @@ class AxCircuit:
                 err = self.rtl2py(base=base, target=target)
 
                 if err is ErrorCodes.OK:
-                    self.testbench()
+                    self.run_testbench()
 
             except FileExistsError:
-                print(f">>> Skipping combination \"{s}\" because it already exists (dir: {base}")
+                print(f">>> Skipping combination \"{s}\" because it already exists (dir: {base})")
                 print("")
 
     # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 
-    def testbench(self):
+    def run_testbench(self):
         if self.testbench_script is not None:
             print("> Testbench init")
             mod_name = f"{self.pymod_path}.{self.top_name}"
@@ -274,13 +272,13 @@ class AxCircuit:
 
         prun_level_str = "%02d" % (prun_level)
 
-        if "_build" in base:
-            base = base.split("_build")[0]
+        #if "_build" in base:
+        #    base = base.split("_build")[0]
 
         if self.group_dir == "":
-            probprun_netlist_path = f"{self.top_name}_{base}_probprun_{prun_level_str}_netlist"
+            probprun_netlist_path = f"{self.top_name}_{base}_probprun_{prun_level_str}/netlist"
         else:
-            probprun_netlist_path = f"{self.group_dir}/{self.top_name}_{base}_probprun_{prun_level_str}_netlist"
+            probprun_netlist_path = f"{self.group_dir}/{self.top_name}_{base}_probprun_{prun_level_str}/netlist"
 
         os.makedirs(probprun_netlist_path, exist_ok = True)
 
@@ -380,7 +378,7 @@ class AxCircuit:
             self.netlist_target_path = "{d}{c}.v".format(d=self.target_netlist_dir, c=self.top_name)
             self.current_parameter = target
 
-            self.testbench()
+            self.run_testbench()
 
     # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
@@ -391,11 +389,13 @@ class AxCircuit:
         y_data = csv_data[y_name].tolist()
         x_pareto, y_pareto, index = pareto_front(x_data, y_data)
         pareto_elements = []
+        pareto_circuits = []
         print(f"> Pareto front for {self.top_name}:")
         for i in index:
             name = csv_data["circuit"][i]
             pareto_line = f"circuit: {name}, x: {x_data[i]}, y: {y_data[i]}"
             pareto_elements.append(pareto_line)
+            pareto_circuits.append(name)
             print(f"  > {pareto_line}")
         if self.group_dir == "":
             pareto_filename = f"pareto_{x_name}_{y_name}.txt"
@@ -416,3 +416,4 @@ class AxCircuit:
         plt.savefig(pareto_image)
         plt.savefig(pareto_image.replace(".pdf", ".png"))
         plt.show()
+        return pareto_circuits
