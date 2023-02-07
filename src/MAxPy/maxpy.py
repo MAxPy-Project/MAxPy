@@ -22,7 +22,6 @@ from .compile import compile
 from .check import check
 from .results import ResultsTable
 from .pareto import pareto_front
-from .probprun import probprun
 
 
 class AxCircuit:
@@ -242,6 +241,11 @@ class AxCircuit:
                 print(f">>> Skipping combination \"{s}\" because it already exists (dir: {base})")
                 print("")
 
+        print("------------------------------------------------------------------------------------")
+        print(">>> param loop end")
+        print("------------------------------------------------------------------------------------")
+        print("")
+
     # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 
@@ -250,6 +254,7 @@ class AxCircuit:
             print("> Testbench init")
             mod_name = f"{self.pymod_path}.{self.top_name}"
             mod = importlib.import_module(mod_name, package=None)
+            self.node_info = []
             self.prun_flag, self.node_info = self.testbench_script(ckt=mod, results_filename=self.results_filename)
             print("> Testbench end\n")
             return ErrorCodes.OK
