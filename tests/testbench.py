@@ -26,9 +26,14 @@ def testbench_run(ckt=None, results_filename=None):
 
     print(">>> testbench end")
 
-    return False, []
+    if mre < 30:
+        prun_flag = True
+    else:
+        prun_flag = False
+
+    return prun_flag, adder.node_info
 
 
 if __name__ == "__main__":
-    mod = importlib.import_module(name="adder4_exact.adder4")
-    testbench_run(mod)
+    mod = importlib.import_module(name="study_no_1.adder4_copyA_0.adder4")
+    testbench_run(ckt=mod, results_filename="test.csv")

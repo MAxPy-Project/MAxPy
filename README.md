@@ -23,6 +23,7 @@
   * build
   * matplotlib
   * pandas
+  * numpy
 
 ```sh
 python -m pip install --upgrade build
