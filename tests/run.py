@@ -2,10 +2,10 @@ from MAxPy import maxpy
 from MAxPy import probprun
 from testbench import testbench_run
 
-circuit = maxpy.AxCircuit(top_name="adder4")#, synth_overwrite = True)
+circuit = maxpy.AxCircuit(top_name="adder4")
 circuit.set_testbench_script(testbench_run)
 
-basic flow rtl level
+#basic flow rtl level
 circuit.rtl2py(target="exact")
 
 
