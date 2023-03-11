@@ -110,7 +110,7 @@ pip install --force-reinstall dist/maxpy-x.x.x-py3-none-any.whl
 5. Run test script
 ``` sh
 cd tests
-python tests/test.py
+python tests/run.py
 ```
 6. Check the guidelines before making a ```pull request```
   * ```> TO BE DONE```
