@@ -1,7 +1,7 @@
 # MAxPy Multi-layer Approximate Computing Python Framework
 ## Preparation
 Prior to running MAxPy, the following preparation needs to be done.
-1. Install required system packages: ```make``` ```cmake``` ```clang``` ```gcc``` ```tcl``` ```swig``` ```bison``` ```flex``` ```pip``` ```ninja```
+1. Install required system packages: ```make``` ```cmake``` ```clang``` ```gcc``` ```tcl``` ```swig``` ```bison``` ```flex``` ```pip``` ```ninja``` 
 2. Install required Python packages: ```build``` ```matplotlib``` ```pandas``` ```numpy```
 3. Install ```Yosys```
   * Option 1: from source 
