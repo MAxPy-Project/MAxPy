@@ -114,3 +114,10 @@ python tests/run.py
 ```
 6. Check the guidelines before making a ```pull request```
   * ```> TO BE DONE```
+## Building documentation
+1. Install system package ```python-sphinx```
+2. In the MAxPy directory run the following command:
+  ```sh
+  sphinx-build -b html docs/source/ docs/build/html
+  ```
+3. The build HTML will be available at ```docs/build/html/```
