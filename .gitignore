@@ -1,7 +1,0 @@
-src/*.egg-info
-dist/
-tests/__pycache__
-tests/adder4_*
-tests/study_*
-tests/*.csv
-docs/build/*

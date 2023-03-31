@@ -1,6 +1,0 @@
-read_liberty [[LIBRARY]]
-read_verilog [[NETLIST]]
-link_design [[TOPMODULE]]
-report_power -digits 5 >[[POWER_REPORT_PATH]]
-report_checks -unconstrained -path_delay max -format summary -digits 5 >[[TIMING_REPORT_PATH]]
-exit
