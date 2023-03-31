@@ -48,11 +48,11 @@ copyright = '2023, Graziella'
 author = 'Graziella'
 release = '0.1'
 
-if os.environ.get('CI') is None:
-    ENV = 'lan'
-else:
-    ENV = 'wan'
-tags.add(ENV)
+# if os.environ.get('CI') is None:
+#     ENV = 'lan'
+# else:
+#     ENV = 'wan'
+# tags.add(ENV)
 
 extensions = [
     'sphinx.ext.duration',
