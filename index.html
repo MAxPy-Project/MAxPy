@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MAxPy Documentation &mdash; MAxPy 0.1 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>MAxPy &mdash; MAxPy 0.1 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -13,10 +13,11 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Usage" href="usage.html" /> 
+    <link rel="next" title="Installation" href="installation.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -29,6 +30,7 @@
           
           <a href="#" class="icon icon-home">
             MAxPy
+              <img src="_static/logo-maxpy.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -39,8 +41,12 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_tutorial.html">Basic tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="case_study_sobel.html">Case Study: Sobel Edge Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="case_study_fft.html">Case Study: FFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="case_study_jpeg.html">Case Study: JPEG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
 </ul>
 
         </div>
@@ -57,7 +63,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">MAxPy Documentation</li>
+      <li class="breadcrumb-item active">MAxPy</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -67,23 +73,68 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="maxpy-documentation">
-<h1>MAxPy Documentation<a class="headerlink" href="#maxpy-documentation" title="Permalink to this headline">¶</a></h1>
-<p><strong>MAxPy</strong> is a framework aimed for simulation and exploration of Approximate Computing techniques in VLSI designs. It is free and <em>open-source</em> (available in <a class="reference external" href="https://github.com/MAxPy-Project/MAxPy">Github</a>).</p>
-<p>MAxPy is part of the <strong>MAxPy Project</strong>: a growing collaborative effort to make Approximate Computing available to the community via easily applicable tools. Check out our <a class="reference external" href="https://github.com/MAxPy-Project">organization page</a> at Github.</p>
+  <div class="section" id="maxpy">
+<h1>MAxPy<a class="headerlink" href="#maxpy" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p><strong>MAxPy</strong> is a framework aimed for simulation and exploration of Approximate Computing techniques in VLSI designs. It is Ptyhon-based, free and <em>open-source</em> (available in <a class="reference external" href="https://github.com/MAxPy-Project/MAxPy">Github</a>).</p>
+<p>MAxPy is part of the <strong>MAxPy Project</strong> - a growing collaborative effort to make Approximate Computing available to the community via easily applicable tools. Check out our <a class="reference external" href="https://github.com/MAxPy-Project">organization page</a> at Github.</p>
+<p>With MAxPy, you are able to:</p>
+<ul class="simple">
+<li><p>Simulate <em>Verilog VLSI designs</em> (either RTL or gate-level) inside a Python environment, with cycle-accurate results.</p></li>
+<li><p>Generate variations for your circuit in an automated way.</p></li>
+<li><p>Explore the effect of using approximate arithmetic blocks in your circuit.</p></li>
+<li><p>Apply Approximate Computing techniques to optimize resources usage, like area, power and timing.</p></li>
+</ul>
+<p>Check the following tutorials to learn how to use MAxPy! Examples are provided in different complexity levels. We recommend for the examples to be followed through the proposed order, but you can skip to any of them which fullfil your design needs.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This project is under active development.</p>
+</div>
+</div>
+<div class="section" id="contact">
+<h2>Contact<a class="headerlink" href="#contact" title="Permalink to this headline">¶</a></h2>
+<p>Please feel free to contact us anytime! You can use the <a class="reference external" href="https://github.com/MAxPy-Project/MAxPy/discussions">discussion space</a> at our Github repository, or contact us by e-mail. Any questions, doubts, suggestions and requests are welcome.</p>
+<ul class="simple">
+<li><p>Yuri Arbeletche - <em>ysba000&#64;gmail.com</em></p></li>
+<li><p>Guilherme Paim - <em>gppaim&#64;ieee.org</em></p></li>
+</ul>
 </div>
 <div class="section" id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="usage.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#system-packages">System packages</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_tutorial.html">Basic tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basic_tutorial.html#the-problem">The problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_tutorial.html#the-rtl-design">The RTL design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_tutorial.html#compiling-with-maxpy">Compiling with MAxPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_tutorial.html#writing-the-testbench">Writing the testbench</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_tutorial.html#exploring-approximate-adders">Exploring approximate adders</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_tutorial.html#exploring-approximate-multipliers">Exploring approximate multipliers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_tutorial.html#using-probabilistic-pruning">Using probabilistic pruning</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="case_study_sobel.html">Case Study: Sobel Edge Detection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="case_study_sobel.html#sobel-basics">Sobel Basics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="case_study_fft.html">Case Study: FFT</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="case_study_fft.html#fft-basics">FFT Basics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="case_study_jpeg.html">Case Study: JPEG</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="case_study_jpeg.html#jpeg-basics">JPEG Basics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="development.html#maxpy-s-internals">MAxPy’s internals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development.html#writing-documentation">Writing documentation</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -93,7 +144,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="usage.html" class="btn btn-neutral float-right" title="Usage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
