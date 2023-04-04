@@ -1,12 +1,14 @@
-Usage
-=====
+Installation
+============
 
 .. _installation:
 
-Installation
-------------
+System packages
+---------------
 
-To use Lumache, first install it using pip: teste tete
+To mention MAxPy is intended for Linux.
+
+To use MAxPy, first install it using pip.
 
 .. .. code-block:: console
 ..
