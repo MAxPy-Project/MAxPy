@@ -45,12 +45,11 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Basic tutorial</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#the-problem">The problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#the-rtl-design">The RTL design</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#compiling-with-maxpy">Compiling with MAxPy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#writing-the-testbench">Writing the testbench</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#exploring-approximate-adders">Exploring approximate adders</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#exploring-approximate-multipliers">Exploring approximate multipliers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#using-probabilistic-pruning">Using probabilistic pruning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rtl-design">RTL design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#converting-from-verilog-to-python">Converting from Verilog to Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#writing-a-testbench">Writing a testbench</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#exploring-approximate-arithmetic-blocks">Exploring Approximate Arithmetic Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#probabilistic-pruning">Probabilistic pruning</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="case_study_sobel.html">Case Study: Sobel Edge Detection</a></li>
@@ -86,7 +85,7 @@
   <div class="section" id="basic-tutorial">
 <h1>Basic tutorial<a class="headerlink" href="#basic-tutorial" title="Permalink to this headline">¶</a></h1>
 <p>This basic tutorial covers the basic functions of the MAxPy framework. By the end of it, you will be able to understand how MAxPy works and its available tools. Then, you can use the framework to develop and optimize your own circuits.</p>
-<p>The code used for this tutorial is available <a class="reference external" href="https://github.com/MAxPy-Project/MAxPy-Tutorial">here</a>.</p>
+<p>To follow this tutorial, you can create and edit the files as requested, or you can use the code available <a class="reference external" href="https://github.com/MAxPy-Project/MAxPy-Tutorial">here</a>.</p>
 <div class="section" id="the-problem">
 <h2>The problem<a class="headerlink" href="#the-problem" title="Permalink to this headline">¶</a></h2>
 <p>Suppose you want to make a hardware accelerator for a Polynomial Function of Degree 1: a <em>linear function</em>. The operation is pretty straightforward: the <span class="math notranslate nohighlight">\(y(x)\)</span> output for any given <span class="math notranslate nohighlight">\(x\)</span> input is the factor <span class="math notranslate nohighlight">\(a\)</span> times the <span class="math notranslate nohighlight">\(x\)</span> input plus factor <span class="math notranslate nohighlight">\(b\)</span>, as shown in the equation below.</p>
@@ -107,29 +106,29 @@
 <div class="line"><br /></div>
 </div>
 </div>
-<div class="section" id="the-rtl-design">
-<h2>The RTL design<a class="headerlink" href="#the-rtl-design" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="rtl-design">
+<h2>RTL design<a class="headerlink" href="#rtl-design" title="Permalink to this headline">¶</a></h2>
 <p>Let’s write the <em>Verilog description</em> of our linear function hardware accelerator. Create anywhere in your system a directory called <code class="docutils literal notranslate"><span class="pre">poly1</span></code>, in which will put all design files used in this tutorial. From now on, we will call this the <em>working directory</em>. Inside the working directory, create a subdirectory named <code class="docutils literal notranslate"><span class="pre">rtl</span></code>, and create a new text file called <code class="docutils literal notranslate"><span class="pre">poly1.v</span></code>.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>poly1
-└── rtl
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>poly1/
+└── rtl/
     └── poly1.v
 </pre></div>
 </div>
 <p>The following code is the hardware description of our circuit, written in Verilog:</p>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> <span class="n">poly1</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
-    <span class="k">input</span> <span class="p">[</span><span class="mh">7</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">x</span><span class="p">;</span>
-    <span class="k">output</span> <span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">y</span><span class="p">;</span>
+    <span class="k">input</span> <span class="k">signed</span> <span class="p">[</span><span class="mh">7</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">x</span><span class="p">;</span>
+    <span class="k">output</span> <span class="k">signed</span> <span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">y</span><span class="p">;</span>
     <span class="k">assign</span> <span class="n">y</span> <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">b</span><span class="p">;</span>
 <span class="k">endmodule</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="compiling-with-maxpy">
-<h2>Compiling with MAxPy<a class="headerlink" href="#compiling-with-maxpy" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="converting-from-verilog-to-python">
+<h2>Converting from Verilog to Python<a class="headerlink" href="#converting-from-verilog-to-python" title="Permalink to this headline">¶</a></h2>
 <p>Now we are going to compile the <em>poly1</em> module in MAxPy, but without any optimizations or approximations for now. The goal at this point is to make a functional module that we can use to write our testbench.</p>
 <p>Create a <code class="docutils literal notranslate"><span class="pre">run1.py</span></code> file inside the working directory:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>poly1
-├── rtl
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>poly1/
+├── rtl/
 │   └── poly1.v
 └── run1.py
 </pre></div>
@@ -140,9 +139,14 @@
 <span class="n">circuit</span><span class="o">.</span><span class="n">rtl2py</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="s2">&quot;exact&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Now it’s time to run MAxPy’s command! Run the following lines in the terminal:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="o">[</span>PATH_TO_WORKING_DIR<span class="o">]</span>/poly1
-python run1.py
+<p>Notice that this script performs only three commands:</p>
+<ol class="arabic simple">
+<li><p>It imports the MAxPy framework into Python</p></li>
+<li><p>It creates an instance of <code class="docutils literal notranslate"><span class="pre">AxCircuit</span></code> class and stores it in the <code class="docutils literal notranslate"><span class="pre">circuit</span></code> object, passing the RTL design’s top circuit name to the <code class="docutils literal notranslate"><span class="pre">top_name</span></code> parameter (this is important: the top circuit name passed here <em>has to be the same</em> declared in the Verilog module)</p></li>
+<li><p>It runs the <code class="docutils literal notranslate"><span class="pre">rtl2py</span></code> method to convert the RTL design into a Python module, passing the value <code class="docutils literal notranslate"><span class="pre">exact</span></code> to the <code class="docutils literal notranslate"><span class="pre">target</span></code> parameter</p></li>
+</ol>
+<p>Now it’s time to get MAxPy running! Run the following lines in the terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python run1.py
 </pre></div>
 </div>
 <p>If everything is fine, you should see a terminal output like the following. In case of any error, please check the <a class="reference internal" href="installation.html"><span class="doc">Installation</span></a> section and review every step of this tutorial.</p>
@@ -168,18 +172,94 @@ ninja: Entering directory `poly1_exact/&#39;
 &gt;&gt;&gt; Circuit &quot;poly1&quot; converted successfully!
 </pre></div>
 </div>
+<p>Let’s take a look on our <em>working directory</em> to see what changes after a successful compilation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>poly1/
+├── rtl/
+│   └── poly1.v
+├── poly1_exact/
+│   ├── source/
+│   ├── netlist_yosys/
+│   ├── CMakeFiles/
+│   ├── CMakeLists.txt
+│   ├── build.ninja
+│   ├── *.log
+│   └── poly1.cpython-310-x86_64-linux-gnu.so
+└── run1.py
+</pre></div>
 </div>
-<div class="section" id="writing-the-testbench">
-<h2>Writing the testbench<a class="headerlink" href="#writing-the-testbench" title="Permalink to this headline">¶</a></h2>
+<p>A directory named <code class="docutils literal notranslate"><span class="pre">poly1_exact</span></code> is created. Notice that this name is made combining the top name of the RTL design with the <code class="docutils literal notranslate"><span class="pre">target</span></code> parameter passed in the <code class="docutils literal notranslate"><span class="pre">rtl2py</span></code> command. Inside it there are several other files and directories:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">poly1.cpython-310-x86_64-linux-gnu.so</span></code>: this is the final product of any successful conversion of a Verilog design to Python. This <strong>.so</strong> file is a <em>shared library</em> that had been compiled based on our circuit funcionality, and then can be loaded into any Python script. Shortly we’ll check how to do so.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">netlist_yosys/</span></code>: it stores the gate-level netlist generated by the logic synthesis tool. Even if the <code class="docutils literal notranslate"><span class="pre">rtl2py</span></code> compilation is being performed in the RTL level, a gate-level netlist is generated for resources estimation purposes (area, power and timing). If no specific synthesis tool is provided, the default one is <strong>Yosys</strong>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">source/</span></code>: directory which contains the C++ source files generated from the Verilog to C++ conversion process (using <strong>Verilator</strong>), plus the C++ to Python wrapper (generated by MAxPy using <strong>Pybind11</strong>). This directory exists only for the C++ compilation process, or eventally for debugging purposes. Normally the user doesn’t need to care about it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CMakeFiles/</span></code>, <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> and <code class="docutils literal notranslate"><span class="pre">build.ninja</span></code>: the compilation of the final Python module is performed combining <strong>CMake</strong> and <strong>ninja</strong> build system. The user shouldn’t need to care about them.</p></li>
+<li><p>Log files: every step of the <code class="docutils literal notranslate"><span class="pre">rtl2py</span></code> process creates a <code class="docutils literal notranslate"><span class="pre">*.log</span></code> file with useful debug information.</p></li>
+</ul>
 </div>
-<div class="section" id="exploring-approximate-adders">
-<h2>Exploring approximate adders<a class="headerlink" href="#exploring-approximate-adders" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="writing-a-testbench">
+<h2>Writing a testbench<a class="headerlink" href="#writing-a-testbench" title="Permalink to this headline">¶</a></h2>
+<p>Now that we have a <em>shared library</em>, we are going to import it into another Python script to perform the simulation and get the evaluation of our circuit: the <em>testbench</em>. Create a <code class="docutils literal notranslate"><span class="pre">tesbench.py</span></code> in the <em>working directory</em>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>poly1/
+├── rtl/
+│   └── poly1.v
+├── poly1_exact/
+│   ├── (...)
+│   └── poly1.cpython-310-x86_64-linux-gnu.so
+├── run1.py
+└── testbench.py
+</pre></div>
 </div>
-<div class="section" id="exploring-approximate-multipliers">
-<h2>Exploring approximate multipliers<a class="headerlink" href="#exploring-approximate-multipliers" title="Permalink to this headline">¶</a></h2>
+<p>Equally important as the <em>shared libraries</em> obtained from the <code class="docutils literal notranslate"><span class="pre">rtl2py</span></code> process, the testbenchs are very important in MAxPy. With them you are able to simulate your circuit operation from a Python environment without the need of a dedicated Verilog simulator. The benefits of doing so are:</p>
+<ul class="simple">
+<li><p>Importing and exporting data to and from the circuit is way more friendly in a Python environment than it is in dedicated Verilog simulators.</p></li>
+<li><p>Use of advanced Python libraries to get quality metrics within the simulation loop.</p></li>
+<li><p>Feed simulation data, such as <em>switching activity</em>, back to MAxPy to get further optimizations with <em>Approximate Computing Techniques</em>.</p></li>
+<li><p>Change the circuit behaviour during simulation using the <em>cycle-accurate switching activity data</em> available in every circuit on MAxPy.</p></li>
+</ul>
+<p>However, the <em>testbench</em> needs to be carefully designed to meet both MAxPy’s required stucture and also the own circuit funcionality.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">from</span> <span class="nn">MAxPy</span> <span class="kn">import</span> <span class="n">results</span>
+
+<span class="k">def</span> <span class="nf">testbench_run</span><span class="p">(</span><span class="n">ckt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">results_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">lin</span> <span class="o">=</span> <span class="n">ckt</span><span class="o">.</span><span class="n">poly1</span><span class="p">()</span>
+    <span class="n">rst</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">ResultsTable</span><span class="p">(</span><span class="n">results_filename</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;mre&quot;</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&gt;&gt;&gt; testbench init - circuit: {lin.name()}, area: </span><span class="si">{lin.area}</span><span class="s2">, parameters: </span><span class="si">{lin.parameters}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">mre</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">lin</span><span class="o">.</span><span class="n">set_a</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">lin</span><span class="o">.</span><span class="n">set_b</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">):</span>
+        <span class="n">lin</span><span class="o">.</span><span class="n">set_x</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">lin</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="n">y_out</span> <span class="o">=</span> <span class="n">lin</span><span class="o">.</span><span class="n">get_y</span><span class="p">()</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">y_out</span>
+        <span class="k">if</span> <span class="n">y_out</span> <span class="o">&amp;</span> <span class="mh">0x8000</span><span class="p">:</span>
+            <span class="n">y_out</span> <span class="o">^=</span> <span class="mh">0xffff</span>
+            <span class="n">y_out</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">y_out</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">y_ref</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span>
+        <span class="k">if</span> <span class="n">y_out</span> <span class="o">!=</span> <span class="n">y_ref</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;a </span><span class="si">{a}</span><span class="s2">, b </span><span class="si">{b}</span><span class="s2">, x </span><span class="si">{x}</span><span class="s2">. ref </span><span class="si">{y_ref}</span><span class="s2">, out </span><span class="si">{y_out}</span><span class="s2"> </span><span class="si">{h:x}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">rst</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">lin</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;mre&quot;</span><span class="p">:</span> <span class="n">mre</span><span class="p">})</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt;&gt;&gt; testbench end&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mre</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">:</span>
+        <span class="n">prun_flag</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">prun_flag</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">prun_flag</span><span class="p">,</span> <span class="n">lin</span><span class="o">.</span><span class="n">node_info</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">mod</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;poly1_exact.poly1&quot;</span><span class="p">)</span>
+    <span class="n">testbench_run</span><span class="p">(</span><span class="n">ckt</span><span class="o">=</span><span class="n">mod</span><span class="p">,</span> <span class="n">results_filename</span><span class="o">=</span><span class="s2">&quot;testbench_dev.csv&quot;</span><span class="p">)</span>
+</pre></div>
 </div>
-<div class="section" id="using-probabilistic-pruning">
-<h2>Using probabilistic pruning<a class="headerlink" href="#using-probabilistic-pruning" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="exploring-approximate-arithmetic-blocks">
+<h2>Exploring Approximate Arithmetic Blocks<a class="headerlink" href="#exploring-approximate-arithmetic-blocks" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="probabilistic-pruning">
+<h2>Probabilistic pruning<a class="headerlink" href="#probabilistic-pruning" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
