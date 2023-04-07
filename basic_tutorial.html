@@ -42,6 +42,7 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Basic tutorial</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#the-problem">The problem</a></li>
@@ -56,6 +57,7 @@
 <li class="toctree-l1"><a class="reference internal" href="case_study_fft.html">Case Study: FFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="case_study_jpeg.html">Case Study: JPEG</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
 </ul>
 
         </div>
@@ -87,7 +89,7 @@
 <p>This basic tutorial covers the basic functions of the MAxPy framework. By the end of it, you will be able to understand how MAxPy works and its available tools. Then, you can use the framework to develop and optimize your own circuits.</p>
 <p>To follow this tutorial, you can create and edit the files as requested, or you can use the code available <a class="reference external" href="https://github.com/MAxPy-Project/MAxPy-Tutorial">here</a>.</p>
 <div class="section" id="the-problem">
-<h2>The problem<a class="headerlink" href="#the-problem" title="Permalink to this headline">¶</a></h2>
+<span id="basic-tutorial-problem"></span><h2>The problem<a class="headerlink" href="#the-problem" title="Permalink to this headline">¶</a></h2>
 <p>Suppose you want to make a hardware accelerator for a Polynomial Function of Degree 1: a <em>linear function</em>. The operation is pretty straightforward: the <span class="math notranslate nohighlight">\(y(x)\)</span> output for any given <span class="math notranslate nohighlight">\(x\)</span> input is the factor <span class="math notranslate nohighlight">\(a\)</span> times the <span class="math notranslate nohighlight">\(x\)</span> input plus factor <span class="math notranslate nohighlight">\(b\)</span>, as shown in the equation below.</p>
 <div class="math notranslate nohighlight">
 \[y(x) = a.x + b\]</div>
@@ -98,7 +100,7 @@
 <li><p>The circuit is going to have 3 inputs (<em>x</em>, <em>a</em> and <em>b</em>), and only one output (<em>y</em>);</p></li>
 <li><p>Each of the three inputs will be <em>8 bits wide</em>, being the MSB the <em>signal bit</em> (values ranging from -128 to 127);</p></li>
 <li><p>To cover all possibilites for data inputs, the output will be <em>16 bit wide</em>;</p></li>
-<li><p>The application in which the linear function hardware accelerator will be used tolerates an error range of <em>10%</em>.</p></li>
+<li><p>The application in which the linear function hardware accelerator will be used tolerates an error range of <em>10%</em>. To measure the error, we are going to use the <em>Mean Relative Error</em> - the MRE.</p></li>
 </ul>
 <p>Taking these assumptions into account, we can draw the following block diagram which represents our hardware accelerator:</p>
 <a class="reference internal image-reference" href="_images/poly1-block.png"><img alt="_images/poly1-block.png" class="align-center" src="_images/poly1-block.png" style="width: 400px;" /></a>
@@ -109,8 +111,8 @@
 <div class="section" id="rtl-design">
 <h2>RTL design<a class="headerlink" href="#rtl-design" title="Permalink to this headline">¶</a></h2>
 <p>Let’s write the <em>Verilog description</em> of our linear function hardware accelerator. Create anywhere in your system a directory called <code class="docutils literal notranslate"><span class="pre">poly1</span></code>, in which will put all design files used in this tutorial. From now on, we will call this the <em>working directory</em>. Inside the working directory, create a subdirectory named <code class="docutils literal notranslate"><span class="pre">rtl</span></code>, and create a new text file called <code class="docutils literal notranslate"><span class="pre">poly1.v</span></code>.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>poly1/
-└── rtl/
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>poly1
+└── rtl
     └── poly1.v
 </pre></div>
 </div>
@@ -127,8 +129,8 @@
 <h2>Converting from Verilog to Python<a class="headerlink" href="#converting-from-verilog-to-python" title="Permalink to this headline">¶</a></h2>
 <p>Now we are going to compile the <em>poly1</em> module in MAxPy, but without any optimizations or approximations for now. The goal at this point is to make a functional module that we can use to write our testbench.</p>
 <p>Create a <code class="docutils literal notranslate"><span class="pre">run1.py</span></code> file inside the working directory:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>poly1/
-├── rtl/
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>poly1
+├── rtl
 │   └── poly1.v
 └── run1.py
 </pre></div>
@@ -173,13 +175,13 @@ ninja: Entering directory `poly1_exact/&#39;
 </pre></div>
 </div>
 <p>Let’s take a look on our <em>working directory</em> to see what changes after a successful compilation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>poly1/
-├── rtl/
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>poly1
+├── rtl
 │   └── poly1.v
-├── poly1_exact/
-│   ├── source/
-│   ├── netlist_yosys/
-│   ├── CMakeFiles/
+├── poly1_exact
+│   ├── source
+│   ├── netlist_yosys
+│   ├── CMakeFiles
 │   ├── CMakeLists.txt
 │   ├── build.ninja
 │   ├── *.log
@@ -198,18 +200,18 @@ ninja: Entering directory `poly1_exact/&#39;
 </div>
 <div class="section" id="writing-a-testbench">
 <h2>Writing a testbench<a class="headerlink" href="#writing-a-testbench" title="Permalink to this headline">¶</a></h2>
-<p>Now that we have a <em>shared library</em>, we are going to import it into another Python script to perform the simulation and get the evaluation of our circuit: the <em>testbench</em>. Create a <code class="docutils literal notranslate"><span class="pre">tesbench.py</span></code> in the <em>working directory</em>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>poly1/
-├── rtl/
+<p>Now that we have a <em>shared library</em>, we are going to import it into another Python script to perform the simulation and get the evaluation of our circuit: this is the <em>testbench</em>. Create a <code class="docutils literal notranslate"><span class="pre">tesbench.py</span></code> in the <em>working directory</em>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>poly1
+├── rtl
 │   └── poly1.v
-├── poly1_exact/
+├── poly1_exact
 │   ├── (...)
 │   └── poly1.cpython-310-x86_64-linux-gnu.so
 ├── run1.py
 └── testbench.py
 </pre></div>
 </div>
-<p>Equally important as the <em>shared libraries</em> obtained from the <code class="docutils literal notranslate"><span class="pre">rtl2py</span></code> process, the testbenchs are very important in MAxPy. With them you are able to simulate your circuit operation from a Python environment without the need of a dedicated Verilog simulator. The benefits of doing so are:</p>
+<p>Equally important as the <em>shared libraries</em> obtained from the <code class="docutils literal notranslate"><span class="pre">rtl2py</span></code> process, the testbenchs are very important in MAxPy. With them you are able to simulate your circuit operation in a Python environment without the need of a dedicated Verilog simulator. The benefits of doing so are:</p>
 <ul class="simple">
 <li><p>Importing and exporting data to and from the circuit is way more friendly in a Python environment than it is in dedicated Verilog simulators.</p></li>
 <li><p>Use of advanced Python libraries to get quality metrics within the simulation loop.</p></li>
@@ -217,6 +219,7 @@ ninja: Entering directory `poly1_exact/&#39;
 <li><p>Change the circuit behaviour during simulation using the <em>cycle-accurate switching activity data</em> available in every circuit on MAxPy.</p></li>
 </ul>
 <p>However, the <em>testbench</em> needs to be carefully designed to meet both MAxPy’s required stucture and also the own circuit funcionality.</p>
+<p>Take a look at the code from <code class="docutils literal notranslate"><span class="pre">testbench.py</span></code> showed below:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">from</span> <span class="nn">MAxPy</span> <span class="kn">import</span> <span class="n">results</span>
 
@@ -254,6 +257,29 @@ ninja: Entering directory `poly1_exact/&#39;
     <span class="n">testbench_run</span><span class="p">(</span><span class="n">ckt</span><span class="o">=</span><span class="n">mod</span><span class="p">,</span> <span class="n">results_filename</span><span class="o">=</span><span class="s2">&quot;testbench_dev.csv&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Every testbench script should look like this one! Basically, a MAxPy testbench script has two sections: the <code class="docutils literal notranslate"><span class="pre">__main__</span></code> part at the bottom, and the <code class="docutils literal notranslate"><span class="pre">testbench_run</span></code> function.</p>
+<p>The reason for putting the testbench routine in a separate function is that the function can be called when MAxPy is running its automated process (we’ll get into that shortly).</p>
+<p>Also, the <em>main</em> part below is needed when we are designing the testbench itself, so once we have compiled a <em>shared library</em>, we can just run the <code class="docutils literal notranslate"><span class="pre">testbench.py</span></code> script without the needed of running the compilation again.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">__main__</span></code>: no big deal in this. It just loads a compiled <em>shared library</em> and calls the <code class="docutils literal notranslate"><span class="pre">testbench_run</span></code> function, passing the <em>shared library</em> as argument. Notice that in this tutorial we are using the <code class="docutils literal notranslate"><span class="pre">poly1_exact.poly1</span></code> compilation, but it could be any other name created in the design process.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">testbench_run</span></code>: is the testbench routine. Here some things need to happen:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The shared library is passed to the <code class="docutils literal notranslate"><span class="pre">testbench_run</span></code> function via the <code class="docutils literal notranslate"><span class="pre">ckt</span></code> (<em>circuit</em>) parameter. Then we need to make an object of the shred library so we can manipulate it. In this example, the object is called <code class="docutils literal notranslate"><span class="pre">lin</span></code> (for <em>linear</em>), but the can be any other.</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">testbench_run</span><span class="p">(</span><span class="n">ckt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">results_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">lin</span> <span class="o">=</span> <span class="n">ckt</span><span class="o">.</span><span class="n">poly1</span><span class="p">()</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>We need to create an object of a MAxPy internal structure for results recording. This structure is called <code class="docutils literal notranslate"><span class="pre">ResultsTable</span></code>, and it is instantiated at the <code class="docutils literal notranslate"><span class="pre">rst</span></code> object. Notice that we are passing a list of strings as arguments. Each string in this list represents a <em>quality metric</em> used in this circuit. As we stated at <a class="reference internal" href="#basic-tutorial-problem"><span class="std std-ref">the begining of this tutorial</span></a>, the chosen quality metric is the MRE, so we are passing the <code class="docutils literal notranslate"><span class="pre">[&quot;mre&quot;]</span></code> to the <code class="docutils literal notranslate"><span class="pre">ResultsTable</span></code> object. In this tutorial we are using only one <em>quality metric</em>. If the application requires more than one, just append the others to the same string list (for example: <code class="docutils literal notranslate"><span class="pre">[&quot;mre&quot;,</span> <span class="pre">&quot;mse&quot;,</span> <span class="pre">&quot;mae&quot;]</span></code>).</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rst</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">ResultsTable</span><span class="p">(</span><span class="n">results_filename</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;mre&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ul>
 </div>
 <div class="section" id="exploring-approximate-arithmetic-blocks">
 <h2>Exploring Approximate Arithmetic Blocks<a class="headerlink" href="#exploring-approximate-arithmetic-blocks" title="Permalink to this headline">¶</a></h2>

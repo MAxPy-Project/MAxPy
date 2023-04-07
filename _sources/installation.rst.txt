@@ -3,12 +3,16 @@ Installation
 
 .. _installation:
 
+MAxPy is a Python based application, and it is meant to run on Linux systems.
+
 System packages
 ---------------
 
-To mention MAxPy is intended for Linux.
 
-To use MAxPy, first install it using pip.
+Python packages
+---------------
+
+
 
 .. .. code-block:: console
 ..

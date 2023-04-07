@@ -5,6 +5,7 @@ This basic tutorial covers the basic functions of the MAxPy framework. By the en
 
 To follow this tutorial, you can create and edit the files as requested, or you can use the code available `here <https://github.com/MAxPy-Project/MAxPy-Tutorial>`_.
 
+.. _basic_tutorial_problem:
 
 The problem
 -----------
@@ -22,7 +23,7 @@ Now we are going to make some assumptions for our application:
 * The circuit is going to have 3 inputs (*x*, *a* and *b*), and only one output (*y*);
 * Each of the three inputs will be *8 bits wide*, being the MSB the *signal bit* (values ranging from -128 to 127);
 * To cover all possibilites for data inputs, the output will be *16 bit wide*;
-* The application in which the linear function hardware accelerator will be used tolerates an error range of *10%*.
+* The application in which the linear function hardware accelerator will be used tolerates an error range of *10%*. To measure the error, we are going to use the *Mean Relative Error* - the MRE.
 
 Taking these assumptions into account, we can draw the following block diagram which represents our hardware accelerator:
 
@@ -39,8 +40,8 @@ Let's write the *Verilog description* of our linear function hardware accelerato
 
 ::
 
-    poly1/
-    └── rtl/
+    poly1
+    └── rtl
         └── poly1.v
 
 The following code is the hardware description of our circuit, written in Verilog:
@@ -64,8 +65,8 @@ Create a ``run1.py`` file inside the working directory:
 
 ::
 
-    poly1/
-    ├── rtl/
+    poly1
+    ├── rtl
     │   └── poly1.v
     └── run1.py
 
@@ -121,13 +122,13 @@ Let's take a look on our *working directory* to see what changes after a success
 
 ::
 
-    poly1/
-    ├── rtl/
+    poly1
+    ├── rtl
     │   └── poly1.v
-    ├── poly1_exact/
-    │   ├── source/
-    │   ├── netlist_yosys/
-    │   ├── CMakeFiles/
+    ├── poly1_exact
+    │   ├── source
+    │   ├── netlist_yosys
+    │   ├── CMakeFiles
     │   ├── CMakeLists.txt
     │   ├── build.ninja
     │   ├── *.log
@@ -150,20 +151,20 @@ A directory named ``poly1_exact`` is created. Notice that this name is made comb
 Writing a testbench
 -------------------
 
-Now that we have a *shared library*, we are going to import it into another Python script to perform the simulation and get the evaluation of our circuit: the *testbench*. Create a ``tesbench.py`` in the *working directory*:
+Now that we have a *shared library*, we are going to import it into another Python script to perform the simulation and get the evaluation of our circuit: this is the *testbench*. Create a ``tesbench.py`` in the *working directory*:
 
 ::
 
-    poly1/
-    ├── rtl/
+    poly1
+    ├── rtl
     │   └── poly1.v
-    ├── poly1_exact/
+    ├── poly1_exact
     │   ├── (...)
     │   └── poly1.cpython-310-x86_64-linux-gnu.so
     ├── run1.py
     └── testbench.py
 
-Equally important as the *shared libraries* obtained from the ``rtl2py`` process, the testbenchs are very important in MAxPy. With them you are able to simulate your circuit operation from a Python environment without the need of a dedicated Verilog simulator. The benefits of doing so are:
+Equally important as the *shared libraries* obtained from the ``rtl2py`` process, the testbenchs are very important in MAxPy. With them you are able to simulate your circuit operation in a Python environment without the need of a dedicated Verilog simulator. The benefits of doing so are:
 
 * Importing and exporting data to and from the circuit is way more friendly in a Python environment than it is in dedicated Verilog simulators.
 
@@ -174,6 +175,8 @@ Equally important as the *shared libraries* obtained from the ``rtl2py`` process
 * Change the circuit behaviour during simulation using the *cycle-accurate switching activity data* available in every circuit on MAxPy.
 
 However, the *testbench* needs to be carefully designed to meet both MAxPy's required stucture and also the own circuit funcionality.
+
+Take a look at the code from ``testbench.py`` showed below:
 
 .. code-block:: python
 
@@ -212,6 +215,31 @@ However, the *testbench* needs to be carefully designed to meet both MAxPy's req
     if __name__ == "__main__":
         mod = importlib.import_module(name="poly1_exact.poly1")
         testbench_run(ckt=mod, results_filename="testbench_dev.csv")
+
+
+Every testbench script should look like this one! Basically, a MAxPy testbench script has two sections: the ``__main__`` part at the bottom, and the ``testbench_run`` function.
+
+The reason for putting the testbench routine in a separate function is that the function can be called when MAxPy is running its automated process (we'll get into that shortly).
+
+Also, the *main* part below is needed when we are designing the testbench itself, so once we have compiled a *shared library*, we can just run the ``testbench.py`` script without the needed of running the compilation again.
+
+* ``__main__``: no big deal in this. It just loads a compiled *shared library* and calls the ``testbench_run`` function, passing the *shared library* as argument. Notice that in this tutorial we are using the ``poly1_exact.poly1`` compilation, but it could be any other name created in the design process.
+
+* ``testbench_run``: is the testbench routine. Here some things need to happen:
+
+    * The shared library is passed to the ``testbench_run`` function via the ``ckt`` (*circuit*) parameter. Then we need to make an object of the shred library so we can manipulate it. In this example, the object is called ``lin`` (for *linear*), but the can be any other.
+
+    .. code-block:: python
+
+        def testbench_run(ckt=None, results_filename=None):
+            lin = ckt.poly1()
+
+    * We need to create an object of a MAxPy internal structure for results recording. This structure is called ``ResultsTable``, and it is instantiated at the ``rst`` object. Notice that we are passing a list of strings as arguments. Each string in this list represents a *quality metric* used in this circuit. As we stated at :ref:`the begining of this tutorial <basic_tutorial_problem>`, the chosen quality metric is the MRE, so we are passing the ``["mre"]`` to the ``ResultsTable`` object. In this tutorial we are using only one *quality metric*. If the application requires more than one, just append the others to the same string list (for example: ``["mre", "mse", "mae"]``).
+
+    .. code-block:: python
+
+        rst = results.ResultsTable(results_filename, ["mre"])
+
 
 
 Exploring Approximate Arithmetic Blocks
