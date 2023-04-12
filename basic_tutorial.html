@@ -51,6 +51,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#writing-a-testbench">Writing a testbench</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#exploring-approximate-arithmetic-blocks">Exploring Approximate Arithmetic Blocks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#probabilistic-pruning">Probabilistic pruning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conlusion">Conlusion</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="case_study_sobel.html">Case Study: Sobel Edge Detection</a></li>
@@ -88,6 +89,10 @@
 <h1>Basic tutorial<a class="headerlink" href="#basic-tutorial" title="Permalink to this headline">¶</a></h1>
 <p>This basic tutorial covers the basic functions of the MAxPy framework. By the end of it, you will be able to understand how MAxPy works and its available tools. Then, you can use the framework to develop and optimize your own circuits.</p>
 <p>To follow this tutorial, you can create and edit the files as requested, or you can use the code available <a class="reference external" href="https://github.com/MAxPy-Project/MAxPy-Tutorial">here</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Basic means <em>base</em>, not <em>easy</em>! =D</p>
+</div>
 <div class="section" id="the-problem">
 <span id="basic-tutorial-problem"></span><h2>The problem<a class="headerlink" href="#the-problem" title="Permalink to this headline">¶</a></h2>
 <p>Suppose you want to make a hardware accelerator for a Polynomial Function of Degree 1: a <em>linear function</em>. The operation is pretty straightforward: the <span class="math notranslate nohighlight">\(y(x)\)</span> output for any given <span class="math notranslate nohighlight">\(x\)</span> input is the factor <span class="math notranslate nohighlight">\(a\)</span> times the <span class="math notranslate nohighlight">\(x\)</span> input plus factor <span class="math notranslate nohighlight">\(b\)</span>, as shown in the equation below.</p>
@@ -340,9 +345,93 @@ ninja: Entering directory `poly1_exact/&#39;
 </div>
 <div class="section" id="exploring-approximate-arithmetic-blocks">
 <h2>Exploring Approximate Arithmetic Blocks<a class="headerlink" href="#exploring-approximate-arithmetic-blocks" title="Permalink to this headline">¶</a></h2>
+<p>Now that we have a working testbench able to run a complete simulation and to generate the desired quality metrics, suppose we want to explore a little our <code class="docutils literal notranslate"><span class="pre">poly1</span></code> circuit.</p>
+<p>One thing that MAxPy allows to do is to replace basic arithmetic blocks for approximate ones.</p>
+<p>The <strong>MAxPy Project</strong> has a library of <em>Approximate Arithmetic blocks</em>, which is available at the <a class="reference external" href="https://github.com/MAxPy-Project/AxArith">AxArith repository</a>.</p>
+<p>Now let’s get back to the <code class="docutils literal notranslate"><span class="pre">poly1</span></code> <em>working directory</em>. We are going to keep the <code class="docutils literal notranslate"><span class="pre">rtl</span></code> directory and the <code class="docutils literal notranslate"><span class="pre">run1.py</span></code> script as they are.</p>
+<p>We’ll create then a new directory: the <code class="docutils literal notranslate"><span class="pre">rtl_param</span></code>. Inside this directory we’ll create a new RTL description, but with some differences that we’ll see shortly. Also, we’ll create the <code class="docutils literal notranslate"><span class="pre">run2.py</span></code> script, which is going to contain the MAxPy’s instruction for exploring arithmetic blocks.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>poly1
+├── rtl
+│   └── poly1.v
+├── rtl_param
+│   └── poly1.v
+├── poly1_exact
+│   └── ...
+├── run1.py
+└── run2.py
+</pre></div>
+</div>
+<p>MAxPy has a feature for text replacement in <em>Verilog</em> source files. Whenever we want to evaluate any circuit with variations at some specific part, we can write the RTL source using the <code class="docutils literal notranslate"><span class="pre">[[param]]</span></code> notation. The main thing here is the double brackets (<code class="docutils literal notranslate"><span class="pre">[[</span></code> and <code class="docutils literal notranslate"><span class="pre">]</span></code>). The word <code class="docutils literal notranslate"><span class="pre">param</span></code> inside the brackets acts as a variable name. This sort of variable will be replaced for value defined in the <code class="docutils literal notranslate"><span class="pre">run2.py</span></code> script.</p>
+<p>Back to the <code class="docutils literal notranslate"><span class="pre">poly1</span></code> application: it has two arithmetic operations: a multiplication and a sum.</p>
+<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> <span class="n">poly1</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+    <span class="k">input</span> <span class="k">signed</span> <span class="p">[</span><span class="mh">7</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">x</span><span class="p">;</span>
+    <span class="k">output</span> <span class="k">signed</span> <span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">y</span><span class="p">;</span>
+    <span class="kt">wire</span> <span class="k">signed</span> <span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">p</span><span class="p">;</span>
+    <span class="p">[[</span><span class="n">MULTIPLIER_TYPE</span><span class="p">]]</span> <span class="p">#(</span><span class="mh">16</span><span class="p">,</span> <span class="p">[[</span><span class="n">MULTIPLIER_K</span><span class="p">]])</span> <span class="n">mult1</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="p">);</span>
+    <span class="p">[[</span><span class="n">ADDER_TYPE</span><span class="p">]]</span> <span class="p">#(</span><span class="mh">16</span><span class="p">,</span> <span class="p">[[</span><span class="n">ADDER_K</span><span class="p">]])</span> <span class="n">sum1</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+<span class="k">endmodule</span>
+</pre></div>
+</div>
+<p>In the above RTL description, instead of just assigning that <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">=</span> <span class="pre">a*x</span> <span class="pre">+</span> <span class="pre">b;</span></code>, we are spliting this line into two other: the first calls a submodule with name <code class="docutils literal notranslate"><span class="pre">[[MULTIPLIER_TYPE]]</span></code>, passing as parameters <em>16</em> as bit width and <code class="docutils literal notranslate"><span class="pre">[[MULTIPLIER_K]]</span></code> as <em>approximation factor</em>. The inputs of the multiplier submodule are connected to the <code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">x</span></code> inputs, and the output is connected to the wire named <code class="docutils literal notranslate"><span class="pre">p</span></code>. The following lines calls another submodule called <code class="docutils literal notranslate"><span class="pre">[[ADDER_TYPE]]</span></code>, passing as parameters <em>16</em> as bit width and <code class="docutils literal notranslate"><span class="pre">[[ADDER_K]]</span></code> as <em>approximation factor</em>. The inputs of the adder submodule are connected to the <code class="docutils literal notranslate"><span class="pre">p</span></code> wire and the <code class="docutils literal notranslate"><span class="pre">b</span></code> input, while the output of this sum is connect directly to the <code class="docutils literal notranslate"><span class="pre">y</span></code> output.</p>
+<p>Below we can see the <code class="docutils literal notranslate"><span class="pre">run2.py</span></code> code:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MAxPy</span> <span class="kn">import</span> <span class="n">maxpy</span>
+<span class="kn">from</span> <span class="nn">testbench</span> <span class="kn">import</span> <span class="n">testbench_run</span>
+
+<span class="n">circuit</span> <span class="o">=</span> <span class="n">maxpy</span><span class="o">.</span><span class="n">AxCircuit</span><span class="p">(</span><span class="n">top_name</span><span class="o">=</span><span class="s2">&quot;poly1&quot;</span><span class="p">)</span>
+<span class="n">circuit</span><span class="o">.</span><span class="n">set_testbench_script</span><span class="p">(</span><span class="n">testbench_run</span><span class="p">)</span>
+
+<span class="n">circuit</span><span class="o">.</span><span class="n">set_group</span><span class="p">(</span><span class="s2">&quot;study_no_1&quot;</span><span class="p">)</span>
+<span class="n">circuit</span><span class="o">.</span><span class="n">set_synth_tool</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">circuit</span><span class="o">.</span><span class="n">set_results_filename</span><span class="p">(</span><span class="s2">&quot;output.csv&quot;</span><span class="p">)</span>
+<span class="n">circuit</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;[[MULTIPLIER_TYPE]]&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;LoBa&quot;</span><span class="p">,</span> <span class="s2">&quot;Roba&quot;</span><span class="p">,</span> <span class="s2">&quot;Drum&quot;</span><span class="p">,</span> <span class="s2">&quot;Tosam&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;[[MULTIPLIER_K]]&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;[[ADDER_TYPE]]&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;copyA&quot;</span><span class="p">,</span> <span class="s2">&quot;eta1&quot;</span><span class="p">,</span> <span class="s2">&quot;loa&quot;</span><span class="p">,</span> <span class="s2">&quot;trunc0&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;[[ADDER_K]]&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+<span class="n">circuit</span><span class="o">.</span><span class="n">rtl2py_param_loop</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="s2">&quot;rtl_param&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Please notice the following:</p>
+<ul class="simple">
+<li><p>Comparing to the <code class="docutils literal notranslate"><span class="pre">run1.py</span></code> script, we do not have changes until the line <code class="docutils literal notranslate"><span class="pre">circuit.set_testbench_script(testbench_run)</span></code>; here we also need to import MAxPy into Python, instantiate an MAxPy object and set the testbench script to it.</p></li>
+<li><p>As we are going to compile a set of circuits for every combination of parameters, MAxPy allow to create a group using the line <code class="docutils literal notranslate"><span class="pre">circuit.set_group(&quot;study_no_1&quot;)</span></code>. This line just puts all the generated in a subdirectory called <code class="docutils literal notranslate"><span class="pre">study_no_1</span></code>. This name is arbitrary; any other name can be used to make it more significant to the application.</p></li>
+<li><p>The line <code class="docutils literal notranslate"><span class="pre">circuit.set_synth_tool(None)</span></code> defines that we are not using the <em>gate-level</em> simulation in this exploration. This is a recommendation because <em>RTL-level</em> compilation and simulation is faster than gate-level. We can use the gate-level later and apply it only to the most promising circuits.</p></li>
+<li><p>We can set the output file name with the line <code class="docutils literal notranslate"><span class="pre">circuit.set_results_filename(&quot;output.csv&quot;)</span></code>. Any name can be used.</p></li>
+<li><p>The most important part here is the <code class="docutils literal notranslate"><span class="pre">circuit.parameters</span></code> variable. We need to initialize a <em>Python dictionary</em> with the keys containing the <strong>same names of the parameters we used in the RTL description above</strong>. For each key, the value must be a <strong>list of strings</strong> containing every value we want for each parameter to assume.</p></li>
+<li><p>The command <code class="docutils literal notranslate"><span class="pre">circuit.rtl2py_param_loop(base=&quot;rtl_param&quot;)</span></code> puts MAxPy running, automaticaly generating <em>as much circuits as possible combinations for the parameters</em>.</p></li>
+</ul>
+<p>For the defined parameters in this example, a total of <strong>192 circuits</strong> are generated. As we have defined a group called <code class="docutils literal notranslate"><span class="pre">study_no_1</span></code>, every generated circuit is put on its own directory inside the <code class="docutils literal notranslate"><span class="pre">study_no_1</span></code> directory. The <em>working directory</em> will look like the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>poly1
+├── rtl
+│   └── poly1.v
+├── rtl_param
+│   └── poly1.v
+├── poly1_exact
+│   └── ...
+├── study_no_1
+│   ├── poly1_LoBa_1_copyA_1
+│   ├── poly1_LoBa_1_copyA_2
+│   ├── poly1_LoBa_1_copyA_3
+│   ├── poly1_LoBa_1_copyA_4
+│   ├── poly1_LoBa_1_eta1_1
+│   ├── poly1_LoBa_1_eta1_2
+│   ├── poly1_LoBa_1_eta1_3
+│   ├── poly1_LoBa_1_eta1_4
+│   └── ...
+├── run1.py
+└── run2.py
+</pre></div>
+</div>
 </div>
 <div class="section" id="probabilistic-pruning">
 <h2>Probabilistic pruning<a class="headerlink" href="#probabilistic-pruning" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="conlusion">
+<h2>Conlusion<a class="headerlink" href="#conlusion" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>The script names <code class="docutils literal notranslate"><span class="pre">run1.py</span></code>, <code class="docutils literal notranslate"><span class="pre">run2.py</span></code> and <code class="docutils literal notranslate"><span class="pre">run3.py</span></code> are completely arbitrary. You can choose any name you want to match what the script does.</p></li>
+</ul>
 </div>
 </div>
 
