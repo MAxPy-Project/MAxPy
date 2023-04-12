@@ -23,7 +23,7 @@ Now we are going to make some assumptions for our application:
 * The circuit is going to have 3 inputs (*x*, *a* and *b*), and only one output (*y*);
 * Each of the three inputs will be *8 bits wide*, being the MSB the *signal bit* (values ranging from -128 to 127);
 * To cover all possibilites for data inputs, the output will be *16 bit wide*;
-* The application in which the linear function hardware accelerator will be used tolerates an error range of *10%*. To measure the error, we are going to use the *Mean Relative Error* - the MRE.
+* The application in which the linear function hardware accelerator will be used tolerates an error range of *10%*. To measure the error, we are going to use the *Mean Absolute Percentage Error* - the MAPE.
 
 Taking these assumptions into account, we can draw the following block diagram which represents our hardware accelerator:
 
@@ -182,30 +182,41 @@ Take a look at the code from ``testbench.py`` showed below:
 
     import importlib
     from MAxPy import results
+    from sklearn.metrics import mean_absolute_percentage_error
+    from sklearn.metrics import mean_absolute_error
+    from sklearn.metrics import accuracy_score
 
     def testbench_run(ckt=None, results_filename=None):
         lin = ckt.poly1()
-        rst = results.ResultsTable(results_filename, ["mre"])
+        rst = results.ResultsTable(results_filename, ["mape", "mae", "accuracy"])
         print(f">>> testbench init - circuit: {lin.name()}, area: {lin.area}, parameters: {lin.parameters}")
-        mre = 0.0
-        lin.set_a(10)
-        lin.set_b(20)
-        for x in range(min, max):
-            lin.set_x(x)
-            lin.eval()
-            y_out = lin.get_y()
-            h = y_out
-            if y_out & 0x8000:
-                y_out ^= 0xffff
-                y_out += 1
-                y_out *= -1
-            y_ref = int(a*x) + b
-            if y_out != y_ref:
-                print(f"a {a}, b {b}, x {x}. ref {y_ref}, out {y_out} {h:x}")
+        y_true = []
+        y_pred = []
+        for a in range(-128, 128):
+            lin.set_a(a)
+            for b in range(-128, 128):
+                lin.set_b(b)
+                for x in range(-128, 128):
+                    lin.set_x(x)
+                    lin.eval()
+                    y_out = lin.get_y()
+                    if y_out & 0x8000:
+                        y_out ^= 0xffff
+                        y_out += 1
+                        y_out *= -1
+                    y_ref = int(a*x) + b
+                    if y_ref != 0:
+                        y_true.append(y_ref)
+                        y_pred.append(y_out)
+                    count += 1
 
-        rst.add(lin, {"mre": mre})
+        mape = mean_absolute_percentage_error(y_true, y_pred)
+        mae = mean_absolute_error(y_true, y_pred)
+        accuracy = accuracy_score(y_true, y_pred)
+        rst.add(lin, {"mape": mape, "mae": mae, "accuracy": accuracy})
+        print(f"> mape: {mape:.4f}, mae: {mae:.4f}, accuracy: {accuracy:.4f}")
         print(">>> testbench end")
-        if mre < 0.1:
+        if mape < 0.1:
             prun_flag = True
         else:
             prun_flag = False
@@ -215,6 +226,7 @@ Take a look at the code from ``testbench.py`` showed below:
     if __name__ == "__main__":
         mod = importlib.import_module(name="poly1_exact.poly1")
         testbench_run(ckt=mod, results_filename="testbench_dev.csv")
+
 
 
 Every testbench script should look like this one! Basically, a MAxPy testbench script has two sections: the ``__main__`` part at the bottom, and the ``testbench_run`` function.
@@ -229,16 +241,56 @@ Also, the *main* part below is needed when we are designing the testbench itself
 
     * The shared library is passed to the ``testbench_run`` function via the ``ckt`` (*circuit*) parameter. Then we need to make an object of the shred library so we can manipulate it. In this example, the object is called ``lin`` (for *linear*), but the can be any other.
 
-    .. code-block:: python
+        .. code-block:: python
 
-        def testbench_run(ckt=None, results_filename=None):
-            lin = ckt.poly1()
+            def testbench_run(ckt=None, results_filename=None):
+                lin = ckt.poly1()
 
-    * We need to create an object of a MAxPy internal structure for results recording. This structure is called ``ResultsTable``, and it is instantiated at the ``rst`` object. Notice that we are passing a list of strings as arguments. Each string in this list represents a *quality metric* used in this circuit. As we stated at :ref:`the begining of this tutorial <basic_tutorial_problem>`, the chosen quality metric is the MRE, so we are passing the ``["mre"]`` to the ``ResultsTable`` object. In this tutorial we are using only one *quality metric*. If the application requires more than one, just append the others to the same string list (for example: ``["mre", "mse", "mae"]``).
+    * We need to create an object of a MAxPy internal structure for results recording. This structure is called ``ResultsTable``, and it is instantiated at the ``rst`` object. Notice that we are passing a list of strings as arguments. Each string in this list represents a *quality metric* used in this circuit. As we stated at :ref:`the begining of this tutorial <basic_tutorial_problem>`, the chosen quality metric is the MAPE, so we are passing the ``["mape"]`` to the ``ResultsTable`` object. In spite of only one quality metric being allowed, we are adding two more quality metrics: the *Mean Absolute Error* (MAE) and the *Accuracy Score*. You can add as many parameters as you want.
 
-    .. code-block:: python
+        .. code-block:: python
 
-        rst = results.ResultsTable(results_filename, ["mre"])
+            rst = results.ResultsTable(results_filename, ["mape", "mae", "accuracy"])
+
+    * You can find information about these quality metrics in the following links:
+
+        * `MAPE <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.mean_absolute_error.html>`_
+        * `MAE <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.mean_absolute_percentage_error.html>`_
+        * `Accuracy <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.accuracy_score.html>`_
+
+    * This is a basic tutorial about how to use the MAxPy framework. The *polynomial function* application does not intend to be a real world application. Perhaps the chosen quality metrics are not the best fit for evaluating a *polynomial function*. If you have any suggestion that would fit better as example, please let us know - check the :ref:`Contact` page.
+
+    * To apply values to the inputs of the circuit, we must use the ``set`` functions. For every circuit input, MAxPy create a method in the *shared library* called *set_* plus the *name of the input*. For example, as we have instantiated our circuit at the ``lin`` object, we can write to the :math:`a`, :math:`x` and :math:`b` inputs by using the following methods: ``lin.set_a(value)``, ``lin.set_b(value)`` and ``lin.set_x(value)``. The values applied to the inputs must respect the bit width. For example, for an 8 bit input, the value must be in the range from *0* to *255*. Any value outside of this range will throw an error and the execution will stop.
+
+    * After setting all input values, it is needed to call the ``lin.eval()`` method. This is a default method from the *Verilator* tool. It's purpose is to update all the circuit with the new input values, so we can get the output values.
+
+    * To get values from outputs, we need to use the ``get`` methods created by MAxPy for each output. In this application, we have only the :math:`y` output, and we can access its value using the ``lin.get_y()`` function. **Careful attention must be payed when dealing with negative numbers**. The representation used in the circuit is regarding the bit width declared in the RTL description. For example, in a signed 8 bit output, a value of *0x80* represents the *-128* value. If you use the ``lin.get_y()`` and load the result in an ``int`` variable in Python, it will be simply considered as *+128* (this happens because in 8 bit, the signal is represented in the bit number 7; in a Python application, the default *int* bit width is 32, so the signal is represented in the bit number 31). In this example, we used the following code to convert an 8 bit negative number to a 32 bit negative number:
+
+        .. code-block:: python
+
+            y_out = lin.get_y()
+            if y_out & 0x8000:
+                y_out ^= 0xffff
+                y_out += 1
+                y_out *= -1
+
+    * Also, regarding the *tesbench loop*, we have chosen to use all possibilities for the inputs: :math:`a`, :math:`x` and :math:`b`, each one of them being 8 bit wide. This results in a set of 16,777,216 combinations, which may take some time to process (a few minutes) depending on the host system. Again, as this is not intended to be a real application, maybe to check every input possibilities could not be the best approach. Each application should consider which is the best way to evaluate the results.
+
+    * The reference value is generated by the following function. Both the ``y_ref`` and ``y_out`` values are stored in separate arrays, so at the end of the loop we can use whichever method to calculate the quality metrics.
+
+        .. code-block:: python
+
+            y_ref = int(a*x) + b
+
+    * The following section shows how a MAxPy testbench must end. The ``testbench_run`` function must return two values: a *boolean* flag indicating whether the circuit should be further optimized, and the node information after the simulation was performed. This return values are needed when MAxPy is running in the automated loops, so it is able to know when to stop to perform optimizations if the quality metrics had reached a lower level than expected.
+
+        .. code-block:: python
+
+            if mape < 0.1:
+                prun_flag = True
+            else:
+                prun_flag = False
+            return prun_flag, lin.node_info
 
 
 

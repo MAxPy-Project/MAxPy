@@ -100,7 +100,7 @@
 <li><p>The circuit is going to have 3 inputs (<em>x</em>, <em>a</em> and <em>b</em>), and only one output (<em>y</em>);</p></li>
 <li><p>Each of the three inputs will be <em>8 bits wide</em>, being the MSB the <em>signal bit</em> (values ranging from -128 to 127);</p></li>
 <li><p>To cover all possibilites for data inputs, the output will be <em>16 bit wide</em>;</p></li>
-<li><p>The application in which the linear function hardware accelerator will be used tolerates an error range of <em>10%</em>. To measure the error, we are going to use the <em>Mean Relative Error</em> - the MRE.</p></li>
+<li><p>The application in which the linear function hardware accelerator will be used tolerates an error range of <em>10%</em>. To measure the error, we are going to use the <em>Mean Absolute Percentage Error</em> - the MAPE.</p></li>
 </ul>
 <p>Taking these assumptions into account, we can draw the following block diagram which represents our hardware accelerator:</p>
 <a class="reference internal image-reference" href="_images/poly1-block.png"><img alt="_images/poly1-block.png" class="align-center" src="_images/poly1-block.png" style="width: 400px;" /></a>
@@ -222,30 +222,41 @@ ninja: Entering directory `poly1_exact/&#39;
 <p>Take a look at the code from <code class="docutils literal notranslate"><span class="pre">testbench.py</span></code> showed below:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">from</span> <span class="nn">MAxPy</span> <span class="kn">import</span> <span class="n">results</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_absolute_percentage_error</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_absolute_error</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">accuracy_score</span>
 
 <span class="k">def</span> <span class="nf">testbench_run</span><span class="p">(</span><span class="n">ckt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">results_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">lin</span> <span class="o">=</span> <span class="n">ckt</span><span class="o">.</span><span class="n">poly1</span><span class="p">()</span>
-    <span class="n">rst</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">ResultsTable</span><span class="p">(</span><span class="n">results_filename</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;mre&quot;</span><span class="p">])</span>
+    <span class="n">rst</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">ResultsTable</span><span class="p">(</span><span class="n">results_filename</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;mape&quot;</span><span class="p">,</span> <span class="s2">&quot;mae&quot;</span><span class="p">,</span> <span class="s2">&quot;accuracy&quot;</span><span class="p">])</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&gt;&gt;&gt; testbench init - circuit: {lin.name()}, area: </span><span class="si">{lin.area}</span><span class="s2">, parameters: </span><span class="si">{lin.parameters}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">mre</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="n">lin</span><span class="o">.</span><span class="n">set_a</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-    <span class="n">lin</span><span class="o">.</span><span class="n">set_b</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">):</span>
-        <span class="n">lin</span><span class="o">.</span><span class="n">set_x</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">lin</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-        <span class="n">y_out</span> <span class="o">=</span> <span class="n">lin</span><span class="o">.</span><span class="n">get_y</span><span class="p">()</span>
-        <span class="n">h</span> <span class="o">=</span> <span class="n">y_out</span>
-        <span class="k">if</span> <span class="n">y_out</span> <span class="o">&amp;</span> <span class="mh">0x8000</span><span class="p">:</span>
-            <span class="n">y_out</span> <span class="o">^=</span> <span class="mh">0xffff</span>
-            <span class="n">y_out</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="n">y_out</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
-        <span class="n">y_ref</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span>
-        <span class="k">if</span> <span class="n">y_out</span> <span class="o">!=</span> <span class="n">y_ref</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;a </span><span class="si">{a}</span><span class="s2">, b </span><span class="si">{b}</span><span class="s2">, x </span><span class="si">{x}</span><span class="s2">. ref </span><span class="si">{y_ref}</span><span class="s2">, out </span><span class="si">{y_out}</span><span class="s2"> </span><span class="si">{h:x}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">y_true</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">):</span>
+        <span class="n">lin</span><span class="o">.</span><span class="n">set_a</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">):</span>
+            <span class="n">lin</span><span class="o">.</span><span class="n">set_b</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">):</span>
+                <span class="n">lin</span><span class="o">.</span><span class="n">set_x</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="n">lin</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+                <span class="n">y_out</span> <span class="o">=</span> <span class="n">lin</span><span class="o">.</span><span class="n">get_y</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">y_out</span> <span class="o">&amp;</span> <span class="mh">0x8000</span><span class="p">:</span>
+                    <span class="n">y_out</span> <span class="o">^=</span> <span class="mh">0xffff</span>
+                    <span class="n">y_out</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">y_out</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="n">y_ref</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span>
+                <span class="k">if</span> <span class="n">y_ref</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">y_true</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_ref</span><span class="p">)</span>
+                    <span class="n">y_pred</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_out</span><span class="p">)</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
 
-    <span class="n">rst</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">lin</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;mre&quot;</span><span class="p">:</span> <span class="n">mre</span><span class="p">})</span>
+    <span class="n">mape</span> <span class="o">=</span> <span class="n">mean_absolute_percentage_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">mae</span> <span class="o">=</span> <span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">accuracy</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">rst</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">lin</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;mape&quot;</span><span class="p">:</span> <span class="n">mape</span><span class="p">,</span> <span class="s2">&quot;mae&quot;</span><span class="p">:</span> <span class="n">mae</span><span class="p">,</span> <span class="s2">&quot;accuracy&quot;</span><span class="p">:</span> <span class="n">accuracy</span><span class="p">})</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&gt; mape: </span><span class="si">{mape:.4f}</span><span class="s2">, mae: </span><span class="si">{mae:.4f}</span><span class="s2">, accuracy: </span><span class="si">{accuracy:.4f}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt;&gt;&gt; testbench end&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">mre</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">mape</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">:</span>
         <span class="n">prun_flag</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">prun_flag</span> <span class="o">=</span> <span class="kc">False</span>
@@ -264,19 +275,65 @@ ninja: Entering directory `poly1_exact/&#39;
 <li><p><code class="docutils literal notranslate"><span class="pre">__main__</span></code>: no big deal in this. It just loads a compiled <em>shared library</em> and calls the <code class="docutils literal notranslate"><span class="pre">testbench_run</span></code> function, passing the <em>shared library</em> as argument. Notice that in this tutorial we are using the <code class="docutils literal notranslate"><span class="pre">poly1_exact.poly1</span></code> compilation, but it could be any other name created in the design process.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">testbench_run</span></code>: is the testbench routine. Here some things need to happen:</p>
 <blockquote>
-<div><ul class="simple">
-<li><p>The shared library is passed to the <code class="docutils literal notranslate"><span class="pre">testbench_run</span></code> function via the <code class="docutils literal notranslate"><span class="pre">ckt</span></code> (<em>circuit</em>) parameter. Then we need to make an object of the shred library so we can manipulate it. In this example, the object is called <code class="docutils literal notranslate"><span class="pre">lin</span></code> (for <em>linear</em>), but the can be any other.</p></li>
-</ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">testbench_run</span><span class="p">(</span><span class="n">ckt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">results_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div><ul>
+<li><p>The shared library is passed to the <code class="docutils literal notranslate"><span class="pre">testbench_run</span></code> function via the <code class="docutils literal notranslate"><span class="pre">ckt</span></code> (<em>circuit</em>) parameter. Then we need to make an object of the shred library so we can manipulate it. In this example, the object is called <code class="docutils literal notranslate"><span class="pre">lin</span></code> (for <em>linear</em>), but the can be any other.</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">testbench_run</span><span class="p">(</span><span class="n">ckt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">results_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">lin</span> <span class="o">=</span> <span class="n">ckt</span><span class="o">.</span><span class="n">poly1</span><span class="p">()</span>
 </pre></div>
 </div>
-<ul class="simple">
-<li><p>We need to create an object of a MAxPy internal structure for results recording. This structure is called <code class="docutils literal notranslate"><span class="pre">ResultsTable</span></code>, and it is instantiated at the <code class="docutils literal notranslate"><span class="pre">rst</span></code> object. Notice that we are passing a list of strings as arguments. Each string in this list represents a <em>quality metric</em> used in this circuit. As we stated at <a class="reference internal" href="#basic-tutorial-problem"><span class="std std-ref">the begining of this tutorial</span></a>, the chosen quality metric is the MRE, so we are passing the <code class="docutils literal notranslate"><span class="pre">[&quot;mre&quot;]</span></code> to the <code class="docutils literal notranslate"><span class="pre">ResultsTable</span></code> object. In this tutorial we are using only one <em>quality metric</em>. If the application requires more than one, just append the others to the same string list (for example: <code class="docutils literal notranslate"><span class="pre">[&quot;mre&quot;,</span> <span class="pre">&quot;mse&quot;,</span> <span class="pre">&quot;mae&quot;]</span></code>).</p></li>
-</ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rst</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">ResultsTable</span><span class="p">(</span><span class="n">results_filename</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;mre&quot;</span><span class="p">])</span>
+</div></blockquote>
+</li>
+<li><p>We need to create an object of a MAxPy internal structure for results recording. This structure is called <code class="docutils literal notranslate"><span class="pre">ResultsTable</span></code>, and it is instantiated at the <code class="docutils literal notranslate"><span class="pre">rst</span></code> object. Notice that we are passing a list of strings as arguments. Each string in this list represents a <em>quality metric</em> used in this circuit. As we stated at <a class="reference internal" href="#basic-tutorial-problem"><span class="std std-ref">the begining of this tutorial</span></a>, the chosen quality metric is the MAPE, so we are passing the <code class="docutils literal notranslate"><span class="pre">[&quot;mape&quot;]</span></code> to the <code class="docutils literal notranslate"><span class="pre">ResultsTable</span></code> object. In spite of only one quality metric being allowed, we are adding two more quality metrics: the <em>Mean Absolute Error</em> (MAE) and the <em>Accuracy Score</em>. You can add as many parameters as you want.</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rst</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">ResultsTable</span><span class="p">(</span><span class="n">results_filename</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;mape&quot;</span><span class="p">,</span> <span class="s2">&quot;mae&quot;</span><span class="p">,</span> <span class="s2">&quot;accuracy&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
+</div></blockquote>
+</li>
+<li><p>You can find information about these quality metrics in the following links:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.mean_absolute_error.html">MAPE</a></p></li>
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.mean_absolute_percentage_error.html">MAE</a></p></li>
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.accuracy_score.html">Accuracy</a></p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>This is a basic tutorial about how to use the MAxPy framework. The <em>polynomial function</em> application does not intend to be a real world application. Perhaps the chosen quality metrics are not the best fit for evaluating a <em>polynomial function</em>. If you have any suggestion that would fit better as example, please let us know - check the <a class="reference internal" href="contact.html#contact"><span class="std std-ref">Contact</span></a> page.</p></li>
+<li><p>To apply values to the inputs of the circuit, we must use the <code class="docutils literal notranslate"><span class="pre">set</span></code> functions. For every circuit input, MAxPy create a method in the <em>shared library</em> called <em>set_</em> plus the <em>name of the input</em>. For example, as we have instantiated our circuit at the <code class="docutils literal notranslate"><span class="pre">lin</span></code> object, we can write to the <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(b\)</span> inputs by using the following methods: <code class="docutils literal notranslate"><span class="pre">lin.set_a(value)</span></code>, <code class="docutils literal notranslate"><span class="pre">lin.set_b(value)</span></code> and <code class="docutils literal notranslate"><span class="pre">lin.set_x(value)</span></code>. The values applied to the inputs must respect the bit width. For example, for an 8 bit input, the value must be in the range from <em>0</em> to <em>255</em>. Any value outside of this range will throw an error and the execution will stop.</p></li>
+<li><p>After setting all input values, it is needed to call the <code class="docutils literal notranslate"><span class="pre">lin.eval()</span></code> method. This is a default method from the <em>Verilator</em> tool. It’s purpose is to update all the circuit with the new input values, so we can get the output values.</p></li>
+<li><p>To get values from outputs, we need to use the <code class="docutils literal notranslate"><span class="pre">get</span></code> methods created by MAxPy for each output. In this application, we have only the <span class="math notranslate nohighlight">\(y\)</span> output, and we can access its value using the <code class="docutils literal notranslate"><span class="pre">lin.get_y()</span></code> function. <strong>Careful attention must be payed when dealing with negative numbers</strong>. The representation used in the circuit is regarding the bit width declared in the RTL description. For example, in a signed 8 bit output, a value of <em>0x80</em> represents the <em>-128</em> value. If you use the <code class="docutils literal notranslate"><span class="pre">lin.get_y()</span></code> and load the result in an <code class="docutils literal notranslate"><span class="pre">int</span></code> variable in Python, it will be simply considered as <em>+128</em> (this happens because in 8 bit, the signal is represented in the bit number 7; in a Python application, the default <em>int</em> bit width is 32, so the signal is represented in the bit number 31). In this example, we used the following code to convert an 8 bit negative number to a 32 bit negative number:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">y_out</span> <span class="o">=</span> <span class="n">lin</span><span class="o">.</span><span class="n">get_y</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">y_out</span> <span class="o">&amp;</span> <span class="mh">0x8000</span><span class="p">:</span>
+    <span class="n">y_out</span> <span class="o">^=</span> <span class="mh">0xffff</span>
+    <span class="n">y_out</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">y_out</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>Also, regarding the <em>tesbench loop</em>, we have chosen to use all possibilities for the inputs: <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(b\)</span>, each one of them being 8 bit wide. This results in a set of 16,777,216 combinations, which may take some time to process (a few minutes) depending on the host system. Again, as this is not intended to be a real application, maybe to check every input possibilities could not be the best approach. Each application should consider which is the best way to evaluate the results.</p></li>
+<li><p>The reference value is generated by the following function. Both the <code class="docutils literal notranslate"><span class="pre">y_ref</span></code> and <code class="docutils literal notranslate"><span class="pre">y_out</span></code> values are stored in separate arrays, so at the end of the loop we can use whichever method to calculate the quality metrics.</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">y_ref</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>The following section shows how a MAxPy testbench must end. The <code class="docutils literal notranslate"><span class="pre">testbench_run</span></code> function must return two values: a <em>boolean</em> flag indicating whether the circuit should be further optimized, and the node information after the simulation was performed. This return values are needed when MAxPy is running in the automated loops, so it is able to know when to stop to perform optimizations if the quality metrics had reached a lower level than expected.</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">mape</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">:</span>
+    <span class="n">prun_flag</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">prun_flag</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">return</span> <span class="n">prun_flag</span><span class="p">,</span> <span class="n">lin</span><span class="o">.</span><span class="n">node_info</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ul>
 </div></blockquote>
 </li>
 </ul>
