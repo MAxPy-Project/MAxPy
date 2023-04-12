@@ -5,6 +5,9 @@ This basic tutorial covers the basic functions of the MAxPy framework. By the en
 
 To follow this tutorial, you can create and edit the files as requested, or you can use the code available `here <https://github.com/MAxPy-Project/MAxPy-Tutorial>`_.
 
+.. note::
+   Basic means *base*, not *easy*! =D
+
 .. _basic_tutorial_problem:
 
 The problem
@@ -297,9 +300,103 @@ Also, the *main* part below is needed when we are designing the testbench itself
 Exploring Approximate Arithmetic Blocks
 ---------------------------------------
 
+Now that we have a working testbench able to run a complete simulation and to generate the desired quality metrics, suppose we want to explore a little our ``poly1`` circuit.
+
+One thing that MAxPy allows to do is to replace basic arithmetic blocks for approximate ones.
+
+The **MAxPy Project** has a library of *Approximate Arithmetic blocks*, which is available at the `AxArith repository <https://github.com/MAxPy-Project/AxArith>`_.
+
+Now let's get back to the ``poly1`` *working directory*. We are going to keep the ``rtl`` directory and the ``run1.py`` script as they are.
+
+We'll create then a new directory: the ``rtl_param``. Inside this directory we'll create a new RTL description, but with some differences that we'll see shortly. Also, we'll create the ``run2.py`` script, which is going to contain the MAxPy's instruction for exploring arithmetic blocks.
+
+::
+
+    poly1
+    ├── rtl
+    │   └── poly1.v
+    ├── rtl_param
+    │   └── poly1.v
+    ├── poly1_exact
+    │   └── ...
+    ├── run1.py
+    └── run2.py
+
+MAxPy has a feature for text replacement in *Verilog* source files. Whenever we want to evaluate any circuit with variations at some specific part, we can write the RTL source using the ``[[param]]`` notation. The main thing here is the double brackets (``[[`` and ``]``). The word ``param`` inside the brackets acts as a variable name. This sort of variable will be replaced for value defined in the ``run2.py`` script.
+
+Back to the ``poly1`` application: it has two arithmetic operations: a multiplication and a sum.
 
 
+.. code-block:: verilog
 
+    module poly1(a, b, x, y);
+        input signed [7:0] a, b, x;
+        output signed [15:0] y;
+        wire signed [15:0] p;
+        [[MULTIPLIER_TYPE]] #(16, [[MULTIPLIER_K]]) mult1 (a, x, p);
+        [[ADDER_TYPE]] #(16, [[ADDER_K]]) sum1 (p, b, y);
+    endmodule
+
+In the above RTL description, instead of just assigning that ``y = a*x + b;``, we are spliting this line into two other: the first calls a submodule with name ``[[MULTIPLIER_TYPE]]``, passing as parameters *16* as bit width and ``[[MULTIPLIER_K]]`` as *approximation factor*. The inputs of the multiplier submodule are connected to the ``a`` and ``x`` inputs, and the output is connected to the wire named ``p``. The following lines calls another submodule called ``[[ADDER_TYPE]]``, passing as parameters *16* as bit width and ``[[ADDER_K]]`` as *approximation factor*. The inputs of the adder submodule are connected to the ``p`` wire and the ``b`` input, while the output of this sum is connect directly to the ``y`` output.
+
+Below we can see the ``run2.py`` code:
+
+.. code-block:: python
+
+    from MAxPy import maxpy
+    from testbench import testbench_run
+
+    circuit = maxpy.AxCircuit(top_name="poly1")
+    circuit.set_testbench_script(testbench_run)
+
+    circuit.set_group("study_no_1")
+    circuit.set_synth_tool(None)
+    circuit.set_results_filename("output.csv")
+    circuit.parameters = {
+        "[[MULTIPLIER_TYPE]]": ["LoBa", "Roba", "Drum", "Tosam"],
+        "[[MULTIPLIER_K]]": ["1", "2", "3"],
+        "[[ADDER_TYPE]]": ["copyA", "eta1", "loa", "trunc0"],
+        "[[ADDER_K]]": ["1", "2", "3", "4"],
+    }
+    circuit.rtl2py_param_loop(base="rtl_param")
+
+Please notice the following:
+
+* Comparing to the ``run1.py`` script, we do not have changes until the line ``circuit.set_testbench_script(testbench_run)``; here we also need to import MAxPy into Python, instantiate an MAxPy object and set the testbench script to it.
+
+* As we are going to compile a set of circuits for every combination of parameters, MAxPy allow to create a group using the line ``circuit.set_group("study_no_1")``. This line just puts all the generated in a subdirectory called ``study_no_1``. This name is arbitrary; any other name can be used to make it more significant to the application.
+
+* The line ``circuit.set_synth_tool(None)`` defines that we are not using the *gate-level* simulation in this exploration. This is a recommendation because *RTL-level* compilation and simulation is faster than gate-level. We can use the gate-level later and apply it only to the most promising circuits.
+
+* We can set the output file name with the line ``circuit.set_results_filename("output.csv")``. Any name can be used.
+
+* The most important part here is the ``circuit.parameters`` variable. We need to initialize a *Python dictionary* with the keys containing the **same names of the parameters we used in the RTL description above**. For each key, the value must be a **list of strings** containing every value we want for each parameter to assume.
+
+* The command ``circuit.rtl2py_param_loop(base="rtl_param")`` puts MAxPy running, automaticaly generating *as much circuits as possible combinations for the parameters*.
+
+For the defined parameters in this example, a total of **192 circuits** are generated. As we have defined a group called ``study_no_1``, every generated circuit is put on its own directory inside the ``study_no_1`` directory. The *working directory* will look like the following:
+
+::
+
+    poly1
+    ├── rtl
+    │   └── poly1.v
+    ├── rtl_param
+    │   └── poly1.v
+    ├── poly1_exact
+    │   └── ...
+    ├── study_no_1
+    │   ├── poly1_LoBa_1_copyA_1
+    │   ├── poly1_LoBa_1_copyA_2
+    │   ├── poly1_LoBa_1_copyA_3
+    │   ├── poly1_LoBa_1_copyA_4
+    │   ├── poly1_LoBa_1_eta1_1
+    │   ├── poly1_LoBa_1_eta1_2
+    │   ├── poly1_LoBa_1_eta1_3
+    │   ├── poly1_LoBa_1_eta1_4
+    │   └── ...
+    ├── run1.py
+    └── run2.py
 
 
 Probabilistic pruning
@@ -308,25 +405,10 @@ Probabilistic pruning
 
 
 
+Conlusion
+---------
+
+* The script names ``run1.py``, ``run2.py`` and ``run3.py`` are completely arbitrary. You can choose any name you want to match what the script does.
 
 
 
-.. .. code-block:: console
-..
-..     (.venv) $ pip install lumache
-..
-.. Creating recipes
-.. ----------------
-..
-.. To retireve a list of random ingredients, you can use the ``lumache.get_random_ingredients()`` function:
-..
-.. .. autofunction:: lumache.get_random_ingredients
-..
-..
-.. The ``kind`` parameter should be either ``"meat"``, ``"fish"``, or ``"veggies"``. Otherwise, :py:func:`lumache.get_random_ingredients` will raise an exception.
-..
-.. .. autoexception:: lumache.InvalidKindError
-..
-.. >>> import lumache
-.. >>> lumache.get_random_ingredients()
-.. ['shells', 'gorgonzola', 'parsley']
