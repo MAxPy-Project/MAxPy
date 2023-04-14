@@ -40,8 +40,8 @@ circuit.set_group("study_no_1")
 circuit.set_synth_tool(None)
 circuit.set_results_filename("output.csv")
 circuit.parameters = {
-    "[[PARAM_ADDER01]]": ["copyA","copyB", "eta1", "loa", "trunc0", "trunc1"],
-    "[[PARAM_K]]": ["0", "1", "2", "3"],
+"[[PARAM_ADDER01]]": ["copyA","copyB", "eta1", "loa", "trunc0", "trunc1"],
+"[[PARAM_K]]": ["0", "1", "2", "3"],
 }
 circuit.rtl2py_param_loop(base="rtl_param")
 ```
