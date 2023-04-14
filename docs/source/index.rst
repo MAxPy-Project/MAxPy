@@ -18,10 +18,11 @@ Contents
     overview
     installation
     basic_tutorial
-    case_study_sobel
-    case_study_fft
-    case_study_jpeg
     development
     contact
+
+.. case_study_sobel
+.. case_study_fft
+.. case_study_jpeg
 
 

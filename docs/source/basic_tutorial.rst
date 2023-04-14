@@ -399,14 +399,21 @@ For the defined parameters in this example, a total of **192 circuits** are gene
     └── run2.py
 
 
+.. After each compilaion, testbench.
+
+.. Results table.
+
+.. Pareto.
+
+
 Probabilistic pruning
 ---------------------
 
 
 
 
-Conlusion
----------
+Conclusion
+----------
 
 * The script names ``run1.py``, ``run2.py`` and ``run3.py`` are completely arbitrary. You can choose any name you want to match what the script does.
 
