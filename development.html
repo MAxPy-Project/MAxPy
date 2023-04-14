@@ -18,7 +18,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Contact" href="contact.html" />
-    <link rel="prev" title="Case Study: JPEG" href="case_study_jpeg.html" /> 
+    <link rel="prev" title="Basic tutorial" href="basic_tutorial.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,12 +45,11 @@
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="basic_tutorial.html">Basic tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="case_study_sobel.html">Case Study: Sobel Edge Detection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="case_study_fft.html">Case Study: FFT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="case_study_jpeg.html">Case Study: JPEG</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Development</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#getting-the-repository">Getting the repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-the-package-locally">Installing the package locally</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#building-documentation">Building documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#maxpy-s-internals">MAxPy’s internals</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#writing-documentation">Writing documentation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
@@ -82,11 +81,46 @@
              
   <div class="section" id="development">
 <h1>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="getting-the-repository">
+<h2>Getting the repository<a class="headerlink" href="#getting-the-repository" title="Permalink to this headline">¶</a></h2>
+<p>You can get the MAxPy source code by cloning it from the <a class="reference external" href="https://github.com/MAxPy-Project/MAxPy">Github repository</a>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/MAxPy-Project/MAxPy
+<span class="nb">cd</span> MAxPy
+</pre></div>
+</div>
+</div>
+<div class="section" id="installing-the-package-locally">
+<h2>Installing the package locally<a class="headerlink" href="#installing-the-package-locally" title="Permalink to this headline">¶</a></h2>
+<p>Once you have made the desired changes, you can install the package in the <em>editable mode</em>. Using this options, the package is installed on the system from the local repository. Just run the following command from the repository dir:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python -m pip install -e .
+</pre></div>
+</div>
+</div>
+<div class="section" id="building-documentation">
+<h2>Building documentation<a class="headerlink" href="#building-documentation" title="Permalink to this headline">¶</a></h2>
+<p>Whenever the documentation are edit and pushed into the <a class="reference external" href="https://github.com/MAxPy-Project/MAxPy">Github repository</a>, the documentation is automatically built and it becomes available at <a class="reference external" href="https://maxpy-project.github.io/MAxPy/">https://maxpy-project.github.io/MAxPy/</a>.</p>
+<p>However, you can also build locally the documentation before pushing it. Please follow the instructions bellow:</p>
+<ol class="arabic">
+<li><p>Install <code class="docutils literal notranslate"><span class="pre">sphinx</span></code></p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install sphinx sphinx_rtd_theme
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>Change to the directory where the MAxPy repository is located at and run the documentation build command:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sphinx-build -b html docs/source/ docs/build/html
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>The HTML page will be available at <code class="docutils literal notranslate"><span class="pre">docs/build/html/index.html</span></code></p></li>
+</ol>
+</div>
 <div class="section" id="maxpy-s-internals">
 <h2>MAxPy’s internals<a class="headerlink" href="#maxpy-s-internals" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="writing-documentation">
-<h2>Writing documentation<a class="headerlink" href="#writing-documentation" title="Permalink to this headline">¶</a></h2>
+<p>#TODO</p>
 </div>
 </div>
 
@@ -94,7 +128,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="case_study_jpeg.html" class="btn btn-neutral float-left" title="Case Study: JPEG" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="basic_tutorial.html" class="btn btn-neutral float-left" title="Basic tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="contact.html" class="btn btn-neutral float-right" title="Contact" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

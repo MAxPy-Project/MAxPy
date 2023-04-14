@@ -45,13 +45,10 @@
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#system-packages">System packages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#python-packages">Python packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#maxpy-package">MAxPy package</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="basic_tutorial.html">Basic tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="case_study_sobel.html">Case Study: Sobel Edge Detection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="case_study_fft.html">Case Study: FFT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="case_study_jpeg.html">Case Study: JPEG</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
 </ul>
@@ -83,11 +80,75 @@
   <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <p id="id1">MAxPy is a Python based application, and it is meant to run on Linux systems.</p>
+<p>Prior using MAxPy, you need to install the <a class="reference internal" href="#install-system"><span class="std std-ref">System packages</span></a> and the <a class="reference internal" href="#install-maxpy"><span class="std std-ref">MAxPy package</span></a> itself.</p>
 <div class="section" id="system-packages">
-<h2>System packages<a class="headerlink" href="#system-packages" title="Permalink to this headline">¶</a></h2>
+<span id="install-system"></span><h2>System packages<a class="headerlink" href="#system-packages" title="Permalink to this headline">¶</a></h2>
+<p>As MAxPy relies on other open-source tools, you need first to install them in your system prior to using it.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The following instructions will consider the <strong>APT (Advanced Packaging Tool)</strong> for installing the desired packages in your Debian based (<code class="docutils literal notranslate"><span class="pre">apt-get</span></code> command). However, depending on your system, other package managers can be used, such as <code class="docutils literal notranslate"><span class="pre">pacman</span></code> for Arch based systems.</p>
 </div>
-<div class="section" id="python-packages">
-<h2>Python packages<a class="headerlink" href="#python-packages" title="Permalink to this headline">¶</a></h2>
+<p>Before installing the tools, it is recommended to install some basic system packages used for <em>building packages from source</em>:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt-get install make cmake clang gcc tcl swig bison flex pip ninja
+</pre></div>
+</div>
+</div></blockquote>
+<ol class="arabic">
+<li><p>Install <strong>Yosys</strong></p>
+<blockquote>
+<div><p>Yosys is the default <em>logic synthesis tool</em> used by MAxPy. You can either install it from source following the guidelines available at the <a class="reference external" href="https://github.com/YosysHQ/yosys">Yosys official repository</a>, or you can use the <code class="docutils literal notranslate"><span class="pre">apt</span></code> package manager.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt-get install yosys
+</pre></div>
+</div>
+<p>In principle any version available in the repositories should work. If you have any trouble, please let us know.</p>
+</div></blockquote>
+</li>
+<li><p>Install <strong>OpenSTA</strong></p>
+<blockquote>
+<div><p>OpenSTA is the tool used for static timing analysis and power estimations based on the get-level netlists. As OpenSTA may not be available at the package manager in every Linux distribution, it is advised to build it STA from source. Please check the build instructions at the <a class="reference external" href="https://github.com/The-OpenROAD-Project/OpenSTA">OpenSTA official repository</a>.</p>
+</div></blockquote>
+</li>
+<li><p>Install <strong>Verilator</strong></p>
+<blockquote>
+<div><p>Verilator is the simulation tool which allows Verilog circuits to be simulated as a computer program.  Despite Verilator being available at the <code class="docutils literal notranslate"><span class="pre">apt</span></code> package manager, you should check its version. If the version is equal or greater than <code class="docutils literal notranslate"><span class="pre">v5.002</span></code> then you are good to go.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt-get install verilator
+</pre></div>
+</div>
+<p>However, Verilator can be built from source aswell. You can the instruction available at their <a class="reference external" href="https://verilator.org/guide/latest/install.html">Installation page</a>. Also, you can check the <a class="reference external" href="https://github.com/verilator/verilator">Verilator official repository</a>.</p>
+</div></blockquote>
+</li>
+<li><p>Install <a class="reference external" href="https://pybind11.readthedocs.io/">pybind11</a></p>
+<blockquote>
+<div><p>Pybind11 is a header only library that allows the C++ model generated by Verilator to be translated to Python. As it is very simple, the default <code class="docutils literal notranslate"><span class="pre">apt</span></code> package manager installation should do it:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt-get install pybind11
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ol>
+</div>
+<div class="section" id="maxpy-package">
+<span id="install-maxpy"></span><h2>MAxPy package<a class="headerlink" href="#maxpy-package" title="Permalink to this headline">¶</a></h2>
+<p>You have two options for installing MaxPy:</p>
+<ol class="arabic">
+<li><p>Via <code class="docutils literal notranslate"><span class="pre">pip</span></code></p>
+<blockquote>
+<div><p>Just type the following command in the terminal and it’s done:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install MAxPy
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>Via <code class="docutils literal notranslate"><span class="pre">wheel</span></code> file</p>
+<blockquote>
+<div><p>Download the <code class="docutils literal notranslate"><span class="pre">wheel</span></code> file available from MAxPy’s <a class="reference external" href="https://github.com/MAxPy-Project/MAxPy/releases/latest">latest release on Github</a>. The file is in the <code class="docutils literal notranslate"><span class="pre">MAxPy-x.x.x-py3-none-any.whl</span></code> format, where the <code class="docutils literal notranslate"><span class="pre">x.x.x</span></code> sequence represents the release version. Then just run the following command on the terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install <span class="o">[</span>path_to_the_wheel_file<span class="o">]</span>/MAxPy-x.x.x-py3-none-any.whl
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ol>
 </div>
 </div>
 
