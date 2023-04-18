@@ -21,7 +21,7 @@ Before installing the tools, it is recommended to install some basic system pack
 
     .. code:: bash
 
-        sudo apt-get install make cmake clang gcc tcl swig bison flex pip ninja
+        sudo apt-get install make cmake clang gcc tcl swig bison flex python3-pip ninja-build
 
 #. Install **Yosys**
 
