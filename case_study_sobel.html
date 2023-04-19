@@ -122,7 +122,10 @@
 \[\lvert \nabla A  \rvert = \sqrt{(Hx\times A)^2 + (Hy\times A)^2}\]</div>
 <p>To reduce circuitry complexity, the <em>gradient value</em> can be approximated by the sum of the <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> components absolute values. This sum is then compared to an <em>input threshold value</em>, defining whether or not the given pixel represents an edge.</p>
 <p>The image below depicts a block diagram for the Sobel Operator circuit. There we have 8 inputs for the pixels surrounding the pixel of interest (<code class="docutils literal notranslate"><span class="pre">a0</span></code> to <code class="docutils literal notranslate"><span class="pre">a8</span></code>, skipping <code class="docutils literal notranslate"><span class="pre">a4</span></code>), one <code class="docutils literal notranslate"><span class="pre">theshold</span></code> input for the <em>edge detection threshold</em>, and an <code class="docutils literal notranslate"><span class="pre">edge_out</span></code> output, indicating if the pixel of interest is an edge or not.</p>
-<a class="reference internal image-reference" href="_images/sobel-block-exact.png"><img alt="_images/sobel-block-exact.png" class="align-center" src="_images/sobel-block-exact.png" style="width: 400px;" /></a>
+<div class="figure align-center" id="id1">
+<a class="reference internal image-reference" href="_images/sobel-block-exact.png"><img alt="_images/sobel-block-exact.png" src="_images/sobel-block-exact.png" style="width: 75%;" /></a>
+<p class="caption"><span class="caption-text">Block diagram for the exact Sobel Operator</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
 </div>
 <div class="section" id="quality-metrics">
 <h2>Quality Metrics<a class="headerlink" href="#quality-metrics" title="Permalink to this headline">¶</a></h2>
@@ -134,8 +137,8 @@
 \[Accuracy = \frac{t_p + t_n}{t_p + f_p + t_n + f_n} \times 100\]</div>
 </div>
 <div class="section" id="rtl-exact-description">
-<h2>RTL Exact Description<a class="headerlink" href="#rtl-exact-description" title="Permalink to this headline">¶</a></h2>
-<p>Now let’s get to the circuit description. The following code shows the <em>Verilog description</em> of the block diagram above with no further approximations other than the Sobel Operator already is compared to the <em>Gradient Filter</em>.</p>
+<span id="sobel-rtl-exact"></span><h2>RTL Exact Description<a class="headerlink" href="#rtl-exact-description" title="Permalink to this headline">¶</a></h2>
+<p>Now let’s get to the circuit description. The following code shows the <em>Verilog description</em> of the block diagram above with no further approximations other than the Sobel Operator already is compared to the <em>Gradient Filter</em>. It is placed in a file called <code class="docutils literal notranslate"><span class="pre">sobel.v</span></code> under the <code class="docutils literal notranslate"><span class="pre">rtl</span></code> directory inside the <code class="docutils literal notranslate"><span class="pre">AxSobel</span></code> working directory. This circuit can be compiled running the <code class="docutils literal notranslate"><span class="pre">run_exact.py</span></code> script.</p>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> <span class="n">sobel_gradient</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">grad</span><span class="p">);</span>
     <span class="k">input</span> <span class="p">[</span><span class="mh">7</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">;</span>
     <span class="k">output</span> <span class="p">[</span><span class="mh">10</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">grad</span><span class="p">;</span>
@@ -164,10 +167,90 @@
 <span class="k">endmodule</span>
 </pre></div>
 </div>
-<p>You can find the full testbench script at this <a class="reference external" href="https://github.com/MAxPy-Project/AxSobel/blob/main/testbench.py">link</a>. After running it with the exact circuit, we get the following results:</p>
+<p>You can find the full testbench script at this <a class="reference external" href="https://github.com/MAxPy-Project/AxSobel/blob/main/testbench.py">link</a>. After running it with the exact circuit, we get the following output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">testbench</span> <span class="n">init</span>
+<span class="go">&gt; circuit: sobel</span>
+<span class="go">&gt; parameters: exact</span>
+
+<span class="go">&gt; threshold: 127</span>
+
+<span class="go">&gt; images list:</span>
+<span class="go">    &gt; images/birds/birds.jpeg</span>
+<span class="go">    &gt; images/butterfly/butterfly.jpg</span>
+<span class="go">    &gt; images/fish/fish.jpg</span>
+<span class="go">    &gt; images/mulholland/mulholland.jpeg</span>
+
+<span class="go">&gt; processing image images/birds/birds</span>
+<span class="go">    &gt; reference ok, loading (images/birds/birds_ref_bw.png)</span>
+<span class="go">    &gt; result csv file ok, loading (sobel.csv)</span>
+<span class="go">    &gt; dimension: W 1000 x H 563</span>
+<span class="go">    &gt; loop init</span>
+<span class="go">    &gt; loop end</span>
+<span class="go">&gt; processing image images/butterfly/butterfly</span>
+<span class="go">    &gt; reference ok, loading (images/butterfly/butterfly_ref_bw.png)</span>
+<span class="go">    &gt; result csv file ok, loading (sobel.csv)</span>
+<span class="go">    &gt; dimension: W 1024 x H 683</span>
+<span class="go">    &gt; loop init</span>
+<span class="go">    &gt; loop end</span>
+<span class="go">&gt; processing image images/fish/fish</span>
+<span class="go">    &gt; reference ok, loading (images/fish/fish_ref_bw.png)</span>
+<span class="go">    &gt; result csv file ok, loading (sobel.csv)</span>
+<span class="go">    &gt; dimension: W 1000 x H 667</span>
+<span class="go">    &gt; loop init</span>
+<span class="go">    &gt; loop end</span>
+<span class="go">&gt; processing image images/mulholland/mulholland</span>
+<span class="go">    &gt; reference ok, loading (images/mulholland/mulholland_ref_bw.png)</span>
+<span class="go">    &gt; result csv file ok, loading (sobel.csv)</span>
+<span class="go">    &gt; dimension: W 720 x H 720</span>
+<span class="go">    &gt; loop init</span>
+<span class="go">    &gt; loop end</span>
+<span class="go">&gt; average result: ssim 0.9999, acc 99.99%</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">testbench</span> <span class="n">end</span>
+</pre></div>
+</div>
+<p>As we can see in the testbench output, four images are used as samples to evaluate the <em>quality metrics</em> of the exact verion of the Sobel Operator. For each one of the images, the testbench loop is performed and the quality metrics are accumulated. In the end, the average <strong>SSIM</strong> and <strong>Accuracy</strong> are calculated based on a comparisson with an edge image generated by <em>OpenCV</em>.</p>
+<p>We’ve got a <strong>SSIM</strong> of <em>0.9999</em>, and an <strong>Accuracy</strong> of <em>99.99%</em>, proving that both our Verilog description and the testbench script are working good!</p>
+<p>Here are some image samples of what is happening. We actually cannot see spot differences in edge detection with bare eyes.</p>
+<div class="figure align-center" id="id2">
+<a class="reference internal image-reference" href="_images/birds.jpeg"><img alt="_images/birds.jpeg" src="_images/birds.jpeg" style="width: 75%;" /></a>
+<p class="caption"><span class="caption-text">Original image</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+<div class="figure align-center" id="id3">
+<a class="reference internal image-reference" href="_images/birds_ref_bw.png"><img alt="_images/birds_ref_bw.png" src="_images/birds_ref_bw.png" style="width: 75%;" /></a>
+<p class="caption"><span class="caption-text">OpenCV reference</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+<div class="figure align-center" id="id4">
+<a class="reference internal image-reference" href="_images/birds_sobel_exact_bw.png"><img alt="_images/birds_sobel_exact_bw.png" src="_images/birds_sobel_exact_bw.png" style="width: 75%;" /></a>
+<p class="caption"><span class="caption-text">Generated by the testbench script of out circuit in MAxPy</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can try this with your own images! You just need to add them in the <code class="docutils literal notranslate"><span class="pre">AxSobel/images</span></code> directory, and then update the list in the <code class="docutils literal notranslate"><span class="pre">testbench.py</span></code> script.</p>
+</div>
+<p>Now that we have proved the Verilog description for the Sobel Operation is working with exact results, it’s time to tweak it a little to see how can we save some resources.</p>
 </div>
 <div class="section" id="using-approximate-adders">
 <h2>Using Approximate Adders<a class="headerlink" href="#using-approximate-adders" title="Permalink to this headline">¶</a></h2>
+<p>The following image shows the approach used to make an <em>Approximate Sobel Operator</em> using <em>Approximate Adders</em> in the sum operations. The sum operations had been divided into four groups regarding bit width. Each group has its own <strong>K factor</strong>.</p>
+<div class="figure align-center" id="id5">
+<a class="reference internal image-reference" href="_images/sobel-block-ax.png"><img alt="_images/sobel-block-ax.png" src="_images/sobel-block-ax.png" style="width: 75%;" /></a>
+<p class="caption"><span class="caption-text">Block diagram for the Sobel Operator with approximate adders</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>K factor</strong> is the bit lenght that is going to be approximated in the operation. For example, if we are performing an <em>addition</em> of two 8 bit operands and a <em>K factor</em> of 4, the output’s higher bit part will be the exact sum of the 4 most sifnificant bits of each operand, while the lower bit part of the output will be approximate by the given method.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <a class="reference external" href="https://github.com/MAxPy-Project">MAxPy Project</a> has a library called <a class="reference external" href="https://github.com/MAxPy-Project/AxArith">AxArith</a>, which is a collection of <em>Approximate Arithmetic Blocks</em> such as adders and multipliers.</p>
+<p>The <strong>AxArith</strong> blocks are built in the <strong>MAxPy</strong> framework by default.</p>
+</div>
+<p>The following code is base on the <a class="reference internal" href="#sobel-rtl-exact"><span class="std std-ref">RTL Exact Description</span></a> shown above, but the <em>sum operations</em> had been replaced by submodules. But notice that the names of the submodules are not yet defined: <strong>they are being represented by some “variables” in the ``[[parameter]]`` format</strong>. The description below is placed in a file called <code class="docutils literal notranslate"><span class="pre">sobel.v</span></code> under the <code class="docutils literal notranslate"><span class="pre">rtl_param</span></code> directory inside the <code class="docutils literal notranslate"><span class="pre">AxSobel</span></code> working directory. This circuit can be compiled running the <code class="docutils literal notranslate"><span class="pre">run_param.py</span></code> script.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">run_param.py</span></code> script defines the values for whose the <code class="docutils literal notranslate"><span class="pre">[[parameters]]</span></code> variables are going to be replaced. As the circuit has 11 sum operations, 4 different <strong>K factor</strong> levels, and six types of Approximate Adders, we are goint to have an amount of 14,406 circuits! MAxPy manages to build and simulate everyone of them, putting the results in a table so we can get the <strong>Pareto Front</strong> with the best results!</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Running the <code class="docutils literal notranslate"><span class="pre">run_param.py</span></code> script can take some time (hours long) depending on your system set-up!</p>
+</div>
 </div>
 <div class="section" id="using-probabilistic-pruning">
 <h2>Using Probabilistic Pruning<a class="headerlink" href="#using-probabilistic-pruning" title="Permalink to this headline">¶</a></h2>
