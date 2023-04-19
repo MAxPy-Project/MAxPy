@@ -61,7 +61,8 @@ class MAxPy_[[CLASS_NAME]] : public [[CLASS_NAME]] {
 		void reset_nets(Instance *pi);
         void saif_on_the_fly(int reset);
 		void saif_print_instance(FILE *file_handler, Instance *pi, int level);
-		void clear_memory();[[SAIF_OPT_OUT]]
+		void clear_memory();
+        void enable_saif_output();[[SAIF_OPT_OUT]]
 		
 		// vcd public methods
 		[[VCD_OPT_IN]]void trace(const char* vcd_path);[[VCD_OPT_OUT]]
@@ -73,7 +74,8 @@ class MAxPy_[[CLASS_NAME]] : public [[CLASS_NAME]] {
 		// saif private properties
 		[[SAIF_OPT_IN]]vluint64_t main_time;
 		vluint64_t last_main_time;
-		Instance *top_instance;[[SAIF_OPT_OUT]]
+		Instance *top_instance;
+        bool saif_output;[[SAIF_OPT_OUT]]
 		
 		// vcd private properties
 		[[VCD_OPT_IN]]VerilatedVcdC* tfp;[[VCD_OPT_OUT]]

@@ -91,7 +91,8 @@ MAxPy_[[CLASS_NAME]]::MAxPy_[[CLASS_NAME]](const char* name = "TOP") : [[CLASS_N
 	[[SAIF_OPT_IN]]main_time = 0;
 	last_main_time = 0;
 	top_instance = [[TOP_INSTANCE_METHOD]]();
-	saif_path = "";[[SAIF_OPT_OUT]]
+	saif_path = "";
+    saif_output = false;[[SAIF_OPT_OUT]]
 }
 
 MAxPy_[[CLASS_NAME]]::~MAxPy_[[CLASS_NAME]]() {
@@ -101,7 +102,7 @@ MAxPy_[[CLASS_NAME]]::~MAxPy_[[CLASS_NAME]]() {
 		tfp = nullptr;
 	}[[VCD_OPT_OUT]]
 
-	[[SAIF_OPT_IN]]if(main_time != last_main_time)
+	[[SAIF_OPT_IN]]if(saif_output == true && (main_time != last_main_time))
 		saif_on_the_fly(0);
 
 	clear_memory();[[SAIF_OPT_OUT]]
@@ -174,6 +175,10 @@ void MAxPy_[[CLASS_NAME]]::reset_nets(Instance *pi) {
 			pi = pi->next;
 		}
 	}
+}
+
+void MAxPy_[[CLASS_NAME]]::enable_saif_output() {
+    saif_output = true;
 }
 
 void MAxPy_[[CLASS_NAME]]::saif_on_the_fly(int reset = 0) {
