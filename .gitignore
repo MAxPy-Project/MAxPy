@@ -5,3 +5,4 @@ tests/adder4_*
 tests/study_*
 tests/*.csv
 docs/build/*
+src/MAxPy/__pycache__
