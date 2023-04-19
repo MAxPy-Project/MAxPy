@@ -17,7 +17,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Development" href="development.html" />
+    <link rel="next" title="Case Study: Sobel Edge Detection" href="case_study_sobel.html" />
     <link rel="prev" title="Installation" href="installation.html" /> 
 </head>
 
@@ -54,6 +54,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="case_study_sobel.html">Case Study: Sobel Edge Detection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
 </ul>
@@ -302,7 +303,7 @@ ninja: Entering directory `poly1_exact/&#39;
 </ul>
 </div></blockquote>
 </li>
-<li><p>This is a basic tutorial about how to use the MAxPy framework. The <em>polynomial function</em> application does not intend to be a real world application. Perhaps the chosen quality metrics are not the best fit for evaluating a <em>polynomial function</em>. If you have any suggestion that would fit better as example, please let us know - check the <span class="xref std std-ref">Contact</span> page.</p></li>
+<li><p>This is a basic tutorial about how to use the MAxPy framework. The <em>polynomial function</em> application does not intend to be a real world application. Perhaps the chosen quality metrics are not the best fit for evaluating a <em>polynomial function</em>. If you have any suggestion that would fit better as example, please let us know - check the <a class="reference internal" href="contact.html#contact"><span class="std std-ref">Contact</span></a> page.</p></li>
 <li><p>To apply values to the inputs of the circuit, we must use the <code class="docutils literal notranslate"><span class="pre">set</span></code> functions. For every circuit input, MAxPy create a method in the <em>shared library</em> called <em>set_</em> plus the <em>name of the input</em>. For example, as we have instantiated our circuit at the <code class="docutils literal notranslate"><span class="pre">lin</span></code> object, we can write to the <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(b\)</span> inputs by using the following methods: <code class="docutils literal notranslate"><span class="pre">lin.set_a(value)</span></code>, <code class="docutils literal notranslate"><span class="pre">lin.set_b(value)</span></code> and <code class="docutils literal notranslate"><span class="pre">lin.set_x(value)</span></code>. The values applied to the inputs must respect the bit width. For example, for an 8 bit input, the value must be in the range from <em>0</em> to <em>255</em>. Any value outside of this range will throw an error and the execution will stop.</p></li>
 <li><p>After setting all input values, it is needed to call the <code class="docutils literal notranslate"><span class="pre">lin.eval()</span></code> method. This is a default method from the <em>Verilator</em> tool. It’s purpose is to update all the circuit with the new input values, so we can get the output values.</p></li>
 <li><p>To get values from outputs, we need to use the <code class="docutils literal notranslate"><span class="pre">get</span></code> methods created by MAxPy for each output. In this application, we have only the <span class="math notranslate nohighlight">\(y\)</span> output, and we can access its value using the <code class="docutils literal notranslate"><span class="pre">lin.get_y()</span></code> function. <strong>Careful attention must be payed when dealing with negative numbers</strong>. The representation used in the circuit is regarding the bit width declared in the RTL description. For example, in a signed 8 bit output, a value of <em>0x80</em> represents the <em>-128</em> value. If you use the <code class="docutils literal notranslate"><span class="pre">lin.get_y()</span></code> and load the result in an <code class="docutils literal notranslate"><span class="pre">int</span></code> variable in Python, it will be simply considered as <em>+128</em> (this happens because in 8 bit, the signal is represented in the bit number 7; in a Python application, the default <em>int</em> bit width is 32, so the signal is represented in the bit number 31). In this example, we used the following code to convert an 8 bit negative number to a 32 bit negative number:</p>
@@ -437,7 +438,7 @@ ninja: Entering directory `poly1_exact/&#39;
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="development.html" class="btn btn-neutral float-right" title="Development" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="case_study_sobel.html" class="btn btn-neutral float-right" title="Case Study: Sobel Edge Detection" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

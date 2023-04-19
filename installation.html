@@ -49,6 +49,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="basic_tutorial.html">Basic tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="case_study_sobel.html">Case Study: Sobel Edge Detection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
 </ul>
@@ -90,7 +91,7 @@
 </div>
 <p>Before installing the tools, it is recommended to install some basic system packages used for <em>building packages from source</em>:</p>
 <blockquote>
-<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt-get install make cmake clang gcc tcl swig bison flex python3-pip ninja-build
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt-get install make cmake clang gcc tcl tcl-dev tcllib swig bison flex python3-pip ninja-build
 </pre></div>
 </div>
 </div></blockquote>
@@ -107,6 +108,16 @@
 <li><p>Install <strong>OpenSTA</strong></p>
 <blockquote>
 <div><p>OpenSTA is the tool used for static timing analysis and power estimations based on the get-level netlists. As OpenSTA may not be available at the package manager in every Linux distribution, it is advised to build it STA from source. Please check the build instructions at the <a class="reference external" href="https://github.com/The-OpenROAD-Project/OpenSTA">OpenSTA official repository</a>.</p>
+<p>For short, you can use the following commands, but in case of any trouble, please the check the full install instruction at their repository.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/The-OpenROAD-Project/OpenSTA.git
+<span class="nb">cd</span> OpenSTA
+mkdir build
+<span class="nb">cd</span> build
+cmake ..
+make
+sudo make install
+</pre></div>
+</div>
 </div></blockquote>
 </li>
 <li><p>Install <strong>Verilator</strong></p>

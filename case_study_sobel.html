@@ -16,7 +16,9 @@
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Development" href="development.html" />
+    <link rel="prev" title="Basic tutorial" href="basic_tutorial.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -39,10 +41,19 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="basic_tutorial.html">Basic tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Case Study: Sobel Edge Detection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#sobel-basics">Sobel Basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quality-metrics">Quality Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rtl-exact-description">RTL Exact Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-approximate-adders">Using Approximate Adders</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-probabilistic-pruning">Using Probabilistic Pruning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
 </ul>
@@ -73,16 +84,106 @@
              
   <div class="section" id="case-study-sobel-edge-detection">
 <h1>Case Study: Sobel Edge Detection<a class="headerlink" href="#case-study-sobel-edge-detection" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial presents a more advanced tutorial for an actual application. Here we are going to focus more on the application and less on the MAxPy instructions.</p>
+<p>The circuit studied here is an Approximate Sobel Operator used for Edge Detection in images. You can check the code for this study case <a class="reference external" href="https://github.com/MAxPy-Project/AxSobel">here</a>.</p>
 <div class="section" id="sobel-basics">
 <h2>Sobel Basics<a class="headerlink" href="#sobel-basics" title="Permalink to this headline">¶</a></h2>
-<p>imagem</p>
+<p>The <em>Sobel Operator</em> is used digital processing of images as an approximation to the <em>Gradient Filter</em>, which is needed in edge detection applications. It is composed by two <em>3x3</em> convolution masks, each representing the pixel gradient in both <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> directions. The below equation show the convolution masks used in the Sobel Operator.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\nabla x =
+ 1/4
+ \begin{bmatrix}
+     1 &amp; 2 &amp; 1\\
+     0 &amp; 0 &amp; 0\\
+     -1 &amp;-2 &amp; -2\\
+ \end{bmatrix}
+ *
+ \begin{bmatrix}
+     a0 &amp; a1 &amp; a2\\
+     a3 &amp; a4 &amp; a5\\
+     a6 &amp; a7 &amp; a8\\
+ \end{bmatrix}\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}\nabla y =
+1/4
+\begin{bmatrix}
+    1 &amp; 0 &amp; -1\\
+    2 &amp; 0 &amp; -2\\
+    1 &amp; 0 &amp; -1\\
+\end{bmatrix}
+*
+\begin{bmatrix}
+    a0 &amp; a1 &amp; a2\\
+    a3 &amp; a4 &amp; a5\\
+    a6 &amp; a7 &amp; a8\\
+\end{bmatrix}\end{split}\]</div>
+<p>For any give point of an image, the gradient’s magnitude is defined as following:</p>
+<div class="math notranslate nohighlight">
+\[\lvert \nabla A  \rvert = \sqrt{(Hx\times A)^2 + (Hy\times A)^2}\]</div>
+<p>To reduce circuitry complexity, the <em>gradient value</em> can be approximated by the sum of the <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> components absolute values. This sum is then compared to an <em>input threshold value</em>, defining whether or not the given pixel represents an edge.</p>
+<p>The image below depicts a block diagram for the Sobel Operator circuit. There we have 8 inputs for the pixels surrounding the pixel of interest (<code class="docutils literal notranslate"><span class="pre">a0</span></code> to <code class="docutils literal notranslate"><span class="pre">a8</span></code>, skipping <code class="docutils literal notranslate"><span class="pre">a4</span></code>), one <code class="docutils literal notranslate"><span class="pre">theshold</span></code> input for the <em>edge detection threshold</em>, and an <code class="docutils literal notranslate"><span class="pre">edge_out</span></code> output, indicating if the pixel of interest is an edge or not.</p>
+<a class="reference internal image-reference" href="_images/sobel-block-exact.png"><img alt="_images/sobel-block-exact.png" class="align-center" src="_images/sobel-block-exact.png" style="width: 400px;" /></a>
+</div>
+<div class="section" id="quality-metrics">
+<h2>Quality Metrics<a class="headerlink" href="#quality-metrics" title="Permalink to this headline">¶</a></h2>
+<p>In this application, we are going to generate full images containing the edges of the original sample images. We need then compare the edge images generated by our Sobel Operator to the ones generated by a reliable reference, such as <a class="reference external" href="https://docs.opencv.org/3.4/d2/d2c/tutorial_sobel_derivatives.html">OpenCV</a>. For image comparisson, we have choosen the <em>Structural Simmilarity Index</em> - the <strong>SSIM</strong> - as a <em>quality metric</em>. The SSIM can be defined as in the equation below, and there’s a Python implementation in the <a class="reference external" href="https://scikit-image.org/docs/dev/api/skimage.metrics.html">scikit-image toolbox</a>.</p>
+<div class="math notranslate nohighlight">
+\[SSIM(x,y) = \frac{(2\mu_x\mu_y + c_1)\times(2\sigma_{xy} + c_2)}{(\mu_x^2 + \mu_y^2 + c_1)\times(\sigma_x^2 + \sigma_y^2 + c_2)}\]</div>
+<p>Also, as we are getting <em>boolean values</em> for each pixel, we can check the <em>accuracy of edge detection</em> using the <strong>Accuracy Score</strong> defined in the equation bellow, where <span class="math notranslate nohighlight">\(t_p\)</span> is <em>true positive</em> count, <span class="math notranslate nohighlight">\(t_n\)</span> is <em>true negative</em> count, <span class="math notranslate nohighlight">\(f_p\)</span> if <em>false positive</em> count and <span class="math notranslate nohighlight">\(f_n\)</span> is <em>false negative</em> count.</p>
+<div class="math notranslate nohighlight">
+\[Accuracy = \frac{t_p + t_n}{t_p + f_p + t_n + f_n} \times 100\]</div>
+</div>
+<div class="section" id="rtl-exact-description">
+<h2>RTL Exact Description<a class="headerlink" href="#rtl-exact-description" title="Permalink to this headline">¶</a></h2>
+<p>Now let’s get to the circuit description. The following code shows the <em>Verilog description</em> of the block diagram above with no further approximations other than the Sobel Operator already is compared to the <em>Gradient Filter</em>.</p>
+<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> <span class="n">sobel_gradient</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">grad</span><span class="p">);</span>
+    <span class="k">input</span> <span class="p">[</span><span class="mh">7</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">;</span>
+    <span class="k">output</span> <span class="p">[</span><span class="mh">10</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">grad</span><span class="p">;</span>
+    <span class="kt">wire</span> <span class="k">signed</span> <span class="p">[</span><span class="mh">8</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">;</span>
+    <span class="kt">wire</span> <span class="k">signed</span> <span class="p">[</span><span class="mh">9</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">g13</span><span class="p">,</span> <span class="n">g22</span><span class="p">;</span>
+    <span class="kt">wire</span> <span class="k">signed</span> <span class="p">[</span><span class="mh">10</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">g</span><span class="p">;</span>
+    <span class="k">assign</span> <span class="n">g1</span> <span class="o">=</span> <span class="p">{</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">,</span> <span class="n">a1</span><span class="p">}</span> <span class="o">-</span> <span class="p">{</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">,</span> <span class="n">a2</span><span class="p">};</span>
+    <span class="k">assign</span> <span class="n">g2</span> <span class="o">=</span> <span class="p">{</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">,</span> <span class="n">b1</span><span class="p">}</span> <span class="o">-</span> <span class="p">{</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">,</span> <span class="n">b2</span><span class="p">};</span>
+    <span class="k">assign</span> <span class="n">g3</span> <span class="o">=</span> <span class="p">{</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">,</span> <span class="n">c1</span><span class="p">}</span> <span class="o">-</span> <span class="p">{</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">,</span> <span class="n">c2</span><span class="p">};</span>
+    <span class="k">assign</span> <span class="n">g13</span> <span class="o">=</span> <span class="n">g1</span> <span class="o">+</span> <span class="n">g3</span><span class="p">;</span>
+    <span class="k">assign</span> <span class="n">g22</span> <span class="o">=</span> <span class="n">g2</span> <span class="o">*</span> <span class="mh">9</span><span class="mi">&#39;d2</span><span class="p">;</span>
+    <span class="k">assign</span> <span class="n">g</span> <span class="o">=</span> <span class="n">g13</span> <span class="o">+</span> <span class="n">g22</span><span class="p">;</span>
+    <span class="k">assign</span> <span class="n">grad</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="mh">10</span><span class="p">]</span> <span class="o">?</span> <span class="o">~</span><span class="n">g</span><span class="o">+</span><span class="mh">11</span><span class="mi">&#39;d1</span> <span class="o">:</span> <span class="n">g</span><span class="p">;</span>
+<span class="k">endmodule</span>
+
+<span class="k">module</span> <span class="n">sobel</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p5</span><span class="p">,</span> <span class="n">p6</span><span class="p">,</span> <span class="n">p7</span><span class="p">,</span> <span class="n">p8</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">edge_out</span><span class="p">);</span>
+    <span class="k">input</span> <span class="p">[</span><span class="mh">7</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">p0</span><span class="p">,</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">,</span><span class="n">p3</span><span class="p">,</span><span class="n">p5</span><span class="p">,</span><span class="n">p6</span><span class="p">,</span><span class="n">p7</span><span class="p">,</span><span class="n">p8</span><span class="p">;</span>
+    <span class="k">input</span> <span class="p">[</span><span class="mh">7</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">threshold</span><span class="p">;</span>
+    <span class="k">output</span> <span class="n">edge_out</span><span class="p">;</span>
+    <span class="kt">wire</span> <span class="p">[</span><span class="mh">10</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">;</span>
+    <span class="kt">wire</span> <span class="p">[</span><span class="mh">11</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">grad</span><span class="p">;</span>
+    <span class="n">sobel_gradient</span> <span class="n">grad_x</span><span class="p">(</span><span class="n">p2</span><span class="p">,</span> <span class="n">p0</span><span class="p">,</span> <span class="n">p5</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p8</span><span class="p">,</span> <span class="n">p6</span><span class="p">,</span> <span class="n">gx</span><span class="p">);</span>
+    <span class="n">sobel_gradient</span> <span class="n">grad_y</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">p6</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p7</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p8</span><span class="p">,</span> <span class="n">gy</span><span class="p">);</span>
+    <span class="k">assign</span> <span class="n">grad</span> <span class="o">=</span> <span class="n">gx</span> <span class="o">+</span> <span class="n">gy</span><span class="p">;</span>
+    <span class="k">assign</span> <span class="n">edge_out</span> <span class="o">=</span> <span class="n">grad</span> <span class="o">&gt;</span> <span class="p">{</span><span class="mh">4</span><span class="mi">&#39;d0</span><span class="p">,</span> <span class="n">threshold</span><span class="p">}</span> <span class="o">?</span> <span class="mh">1</span><span class="mb">&#39;b1</span> <span class="o">:</span> <span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">;</span>
+<span class="k">endmodule</span>
+</pre></div>
+</div>
+<p>You can find the full testbench script at this <a class="reference external" href="https://github.com/MAxPy-Project/AxSobel/blob/main/testbench.py">link</a>. After running it with the exact circuit, we get the following results:</p>
+</div>
+<div class="section" id="using-approximate-adders">
+<h2>Using Approximate Adders<a class="headerlink" href="#using-approximate-adders" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="using-probabilistic-pruning">
+<h2>Using Probabilistic Pruning<a class="headerlink" href="#using-probabilistic-pruning" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="basic_tutorial.html" class="btn btn-neutral float-left" title="Basic tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="development.html" class="btn btn-neutral float-right" title="Development" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
