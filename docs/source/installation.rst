@@ -38,6 +38,18 @@ Before installing the tools, it is recommended to install some basic system pack
 
     OpenSTA is the tool used for static timing analysis and power estimations based on the get-level netlists. As OpenSTA may not be available at the package manager in every Linux distribution, it is advised to build it STA from source. Please check the build instructions at the `OpenSTA official repository <https://github.com/The-OpenROAD-Project/OpenSTA>`_.
 
+    For short, you can use the following commands, but in case of any trouble, please the check the full install instruction at their repository.
+
+    .. code:: bash
+
+        git clone https://github.com/The-OpenROAD-Project/OpenSTA.git
+        cd OpenSTA
+        mkdir build
+        cd build
+        cmake ..
+        make
+        sudo make install
+
 #. Install **Verilator**
 
     Verilator is the simulation tool which allows Verilog circuits to be simulated as a computer program.  Despite Verilator being available at the ``apt`` package manager, you should check its version. If the version is equal or greater than ``v5.002`` then you are good to go.
