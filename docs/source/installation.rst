@@ -52,7 +52,7 @@ Before installing the tools, it is recommended to install some basic system pack
 
 #. Install **Verilator**
 
-    Verilator is the simulation tool which allows Verilog circuits to be simulated as a computer program.  Despite Verilator being available at the ``apt`` package manager, you should check its version. If the version is equal or greater than ``v5.002`` then you are good to go.
+    Verilator is the simulation tool which allows Verilog circuits to be simulated as a computer program.  Despite Verilator being available at the ``apt`` package manager, you should check its version. MAxPy currently works with Verilator version ``v5.002``.
 
     .. code:: bash
 

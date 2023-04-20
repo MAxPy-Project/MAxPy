@@ -2,7 +2,7 @@ import enum
 import datetime
 
 
-version = '0.1.2'
+version = '0.1.2-dev'
 
 
 class MainLoopFsm(enum.Enum):
