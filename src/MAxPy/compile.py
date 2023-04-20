@@ -101,6 +101,13 @@ def compile(axckt):
     log_file.write('\n\n')
     log_file.close()
 
+    # removing CMakeFiles dir to save disk space!
+    ##TODO: reuse verilator and maxpy object files to save compile time and disk space
+    rm_cmd = f"rm -r {axckt.target_compile_dir}CMakeFiles"
+    child = Popen(rm_cmd, shell=True)
+    child.communicate()
+    child.wait()
+
     if error_code != 0:
         ret_val = ErrorCodes.C2PY_COMPILE_ERROR
     else:
