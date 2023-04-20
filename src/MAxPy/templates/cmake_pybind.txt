@@ -9,4 +9,4 @@ pybind11_add_module([[TOP_NAME]]
     ${SOURCES}
 )
 
-target_include_directories([[TOP_NAME]] PUBLIC /home/ysba/verilator/include)
+target_include_directories([[TOP_NAME]] PUBLIC /home/ysba/verilator/include /home/ysba/verilator/include/vltstd)
