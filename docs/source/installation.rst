@@ -21,7 +21,7 @@ Before installing the tools, it is recommended to install some basic system pack
 
     .. code:: bash
 
-        sudo apt-get install make cmake clang gcc tcl tcl-dev tcllib swig bison flex python3-pip ninja-build
+        sudo apt-get install make cmake clang gcc tcl tcl-dev tcllib swig bison flex python3-pip ninja-build help2man
 
 #. Install **Yosys**
 
@@ -66,7 +66,7 @@ Before installing the tools, it is recommended to install some basic system pack
 
     .. code:: bash
 
-        sudo apt-get install pybind11
+        sudo apt-get install pybind11-dev
 
 .. _install_maxpy:
 
