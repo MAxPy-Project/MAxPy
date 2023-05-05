@@ -114,7 +114,8 @@ class AxCircuit:
         if self.synth_opt is False:
             self.synth_tool = "yosys"
 
-        self.base_path = f"{base}/*.v"
+        self.base_path = f"{base}/{self.top_name}.v"
+        self.rtl_base_pah = base
         if self.group_dir == "":
             self.target_compile_dir = f"{self.top_name}_{target}/"
             self.pymod_path = f"{self.top_name}_{target}"

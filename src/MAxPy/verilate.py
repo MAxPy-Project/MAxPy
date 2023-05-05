@@ -18,6 +18,7 @@ def verilate(axckt):
                             + '-Wall -Wno-UNUSED -cc -O0 -top ' + axckt.top_name + ' ' \
                             + '-Mdir ' + axckt.source_output_dir + ' ' \
                             + axckt.res.verilator_config_path + ' ' \
+                            + '-I' + axckt.rtl_base_pah + ' ' \
                             + axckt.base_path + ' ' \
                             + axckt.res.path_tech_verilog + ' ' \
                             + axckt.res.axarith_path + '/adders/*.v ' \
@@ -31,6 +32,7 @@ def verilate(axckt):
                             + '-Wall -Wno-UNUSED -cc -top ' + axckt.top_name + ' ' \
                             + '-Mdir ' + axckt.source_output_dir + ' ' \
                             + axckt.res.verilator_config_path + ' ' \
+                            + '-I' + axckt.rtl_base_pah + ' ' \
                             + axckt.base_path + ' ' \
                             + axckt.res.path_tech_verilog + ' ' \
                             + axckt.res.axarith_path + '/adders/*.v ' \
