@@ -8,7 +8,7 @@ def check(axckt):
 
     module_test_string = "python -c \""
     module_test_string += "from {m} import {n};".format(m=axckt.pymod_path, n=axckt.top_name)
-    module_test_string += "print('  >', %s.%s().name())\"" % (axckt.top_name, axckt.top_name)
+    module_test_string += "print('  >', %s.top().name())\"" % (axckt.top_name)
 
     #print(module_test_string)
 

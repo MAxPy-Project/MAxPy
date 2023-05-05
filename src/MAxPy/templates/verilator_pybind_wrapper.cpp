@@ -334,7 +334,8 @@ void MAxPy_[[CLASS_NAME]]::saif_print_instance(FILE *file_handler, Instance *pi,
 // Pybind wrapper code:
 
 PYBIND11_MODULE([[MODULE_NAME]], m) {
-	py::class_<MAxPy_[[CLASS_NAME]]>(m, "[[MODULE_NAME]]")
+	//py::class_<MAxPy_[[CLASS_NAME]]>(m, "[[MODULE_NAME]]")
+    py::class_<MAxPy_[[CLASS_NAME]]>(m, "top")
 		.def(py::init<const char *>(), py::arg("name")="[[MODULE_NAME]]")
 		.def("name", &MAxPy_[[CLASS_NAME]]::name)
 		.def_readwrite("area", &MAxPy_[[CLASS_NAME]]::area)
