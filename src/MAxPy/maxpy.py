@@ -89,13 +89,13 @@ class AxCircuit:
         if base == "":
             base = "rtl"
 
-        if target == "":
-            target = "level_00"
+        if target != "":
+            target = "_" + target
             self.current_parameter = ""
         else:
             self.current_parameter = target
 
-        self.class_name = f"{self.top_name}_{target}"
+        self.class_name = f"{self.top_name}{target}"
 
         print("------------------------------------------------------------------------------------")
         print(f">>> MAxPy rtl2py: converting Verilog RTL design \"{self.top_name}\" into Python module")
@@ -117,11 +117,11 @@ class AxCircuit:
         self.base_path = f"{base}/{self.top_name}.v"
         self.rtl_base_pah = base
         if self.group_dir == "":
-            self.target_compile_dir = f"{self.top_name}_{target}/"
-            self.pymod_path = f"{self.top_name}_{target}"
+            self.target_compile_dir = f"{self.top_name}{target}/"
+            self.pymod_path = f"{self.top_name}{target}"
         else:
-            self.target_compile_dir = f"{self.group_dir}/{self.top_name}_{target}/"
-            self.pymod_path = f"{self.group_dir}.{self.top_name}_{target}"
+            self.target_compile_dir = f"{self.group_dir}/{self.top_name}{target}/"
+            self.pymod_path = f"{self.group_dir}.{self.top_name}{target}"
         self.target_netlist_dir = "{t}netlist_{s}/".format(t=self.target_compile_dir, s=self.synth_tool)
         self.source_output_dir = "{t}source/".format(t=self.target_compile_dir)
 
@@ -264,39 +264,39 @@ class AxCircuit:
     # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 
-    def testbench_param_loop(self):
-        if self.testbench_script is None:
-            print("Error! Testbench script is None!\n")
-            return
-
-        keys = self.parameters.keys()
-        values = (self.parameters[key] for key in keys)
-        combinations = [dict(zip(keys, combination)) for combination in itertools.product(*values)]
-
-        for param_list in combinations:
-            target = ""
-            for key in param_list:
-                value = param_list[key]
-                #key_name = key.split("[[PARAM_")[1].replace("]]", "")
-                if target != "":
-                    target = target + "_"
-                target = target + f"{value}"
-
-            if self.synth_tool is not None:
-                target = target + "_" +  self.synth_tool
-
-            if self.group_dir == "":
-                self.target_compile_dir = f"{self.top_name}_{target}/"
-                self.pymod_path = f"{self.top_name}_{target}"
-            else:
-                self.target_compile_dir = f"{self.group_dir}/{self.top_name}_{target}/"
-                self.pymod_path = f"{self.group_dir}.{self.top_name}_{target}"
-
-            self.target_netlist_dir = "{t}netlist_{s}/".format(t=self.target_compile_dir, s=self.synth_tool)
-            self.netlist_target_path = "{d}{c}.v".format(d=self.target_netlist_dir, c=self.top_name)
-            self.current_parameter = target
-
-            self.run_testbench()
+    # def testbench_param_loop(self):
+    #     if self.testbench_script is None:
+    #         print("Error! Testbench script is None!\n")
+    #         return
+    #
+    #     keys = self.parameters.keys()
+    #     values = (self.parameters[key] for key in keys)
+    #     combinations = [dict(zip(keys, combination)) for combination in itertools.product(*values)]
+    #
+    #     for param_list in combinations:
+    #         target = ""
+    #         for key in param_list:
+    #             value = param_list[key]
+    #             #key_name = key.split("[[PARAM_")[1].replace("]]", "")
+    #             if target != "":
+    #                 target = target + "_"
+    #             target = target + f"{value}"
+    #
+    #         if self.synth_tool is not None:
+    #             target = target + "_" +  self.synth_tool
+    #
+    #         if self.group_dir == "":
+    #             self.target_compile_dir = f"{self.top_name}_{target}/"
+    #             self.pymod_path = f"{self.top_name}_{target}"
+    #         else:
+    #             self.target_compile_dir = f"{self.group_dir}/{self.top_name}_{target}/"
+    #             self.pymod_path = f"{self.group_dir}.{self.top_name}_{target}"
+    #
+    #         self.target_netlist_dir = "{t}netlist_{s}/".format(t=self.target_compile_dir, s=self.synth_tool)
+    #         self.netlist_target_path = "{d}{c}.v".format(d=self.target_netlist_dir, c=self.top_name)
+    #         self.current_parameter = target
+    #
+    #         self.run_testbench()
 
     # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
