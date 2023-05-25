@@ -89,11 +89,9 @@ class AxCircuit:
         if base == "":
             base = "rtl"
 
+        self.current_parameter = target
         if target != "":
             target = "_" + target
-            self.current_parameter = ""
-        else:
-            self.current_parameter = target
 
         self.class_name = f"{self.top_name}{target}"
 
