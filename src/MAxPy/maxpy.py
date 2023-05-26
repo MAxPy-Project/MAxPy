@@ -59,6 +59,8 @@ class AxCircuit:
         self.log_opt = True
         self.synth_tool = None
         self.results_filename = ""
+        self.source_files_to_edit = []
+        self.synth_skip = False
 
     # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
     # getters and setters
@@ -81,6 +83,12 @@ class AxCircuit:
         else:
             self.results_filename= f"{self.group_dir}/{filename}"
 
+    def set_source_files_to_edit(self, filelist):
+        self.source_files_to_edit = filelist
+
+    def set_synth_skip(self, skip_flag):
+        self.synth_skip = skip_flag
+
     # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
     # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
     # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -95,7 +103,8 @@ class AxCircuit:
 
         self.class_name = f"{self.top_name}{target}"
 
-        print("------------------------------------------------------------------------------------")
+        #print("------------------------------------------------------------------------------------")
+        print("\n")
         print(f">>> MAxPy rtl2py: converting Verilog RTL design \"{self.top_name}\" into Python module")
         print(f"> Base \"{base}\", Target \"{target}\"")
 
@@ -109,7 +118,7 @@ class AxCircuit:
         else:
             self.synth_opt = False
 
-        if self.synth_opt is False:
+        if self.synth_opt is False and self.synth_skip is False:
             self.synth_tool = "yosys"
 
         self.base_path = f"{base}/{self.top_name}.v"
@@ -134,6 +143,10 @@ class AxCircuit:
         os.makedirs(self.source_output_dir, exist_ok = True)
         os.makedirs(self.target_netlist_dir, exist_ok = True)
 
+        for filename in os.listdir(self.target_compile_dir):
+            if filename.endswith("so"):
+                return ErrorCodes.ALREADY_EXISTS
+
         self.trace_levels = 99  ##TODO: ???
 
         self.area = 0.0
@@ -141,30 +154,34 @@ class AxCircuit:
         self.timing = 0.0
 
         # synth: synthesize RTL file
-        if self.prun_netlist is False:
-            err = synth(self)
+        if self.synth_skip is False:
 
-            if self.synth_opt is False:
-                self.synth_tool = None
+            if self.prun_netlist is False:
+                err = synth(self)
 
-            if err is not ErrorCodes.OK:
-                print(">>> End: " + get_time_stamp())
-                print(">>> MAxPy ERROR: synth process exited with error code \"{error}\". Please check log files".format(error=err))
-                return err
+                if self.synth_opt is False:
+                    self.synth_tool = None
+
+                if err is not ErrorCodes.OK:
+                    print(">>> End: " + get_time_stamp())
+                    print(">>> MAxPy ERROR: synth process exited with error code \"{error}\". Please check log files".format(error=err))
+                    return err
+                else:
+                    if self.synth_opt is True:
+                        self.base_path = self.netlist_target_path
+
+                    self.working_netlist = self.netlist_target_path
             else:
-                if self.synth_opt is True:
-                    self.base_path = self.netlist_target_path
+                self.working_netlist = f"{base}/{self.top_name}.v"
 
-                self.working_netlist = self.netlist_target_path
-        else:
+            est_area(self)
+            est_power_timing(self)
+
+            print(f"  > Netlist estimated area: {self.area:.3f}")
+            print(f"  > Netlist estimated power = {self.power:.3f} uW")
+            print(f"  > Netlist estimated maximum delay = {self.timing:.3f} nS")
+
             self.working_netlist = f"{base}/{self.top_name}.v"
-
-        est_area(self)
-        est_power_timing(self)
-
-        print(f"  > Netlist estimated area: {self.area:.3f}")
-        print(f"  > Netlist estimated power = {self.power:.3f} uW")
-        print(f"  > Netlist estimated maximum delay = {self.timing:.3f} nS")
 
         task_list = [
             verilate,
@@ -192,9 +209,7 @@ class AxCircuit:
 
     def rtl2py_param_loop(self, base = ""):
         # change variable parameters in rtl source file
-        file =  open(f"{base}/{self.top_name}.v", 'r')
-        rtl_source_original = file.read()
-        file.close()
+        original_base = base
 
         keys = self.parameters.keys()
         values = (self.parameters[key] for key in keys)
@@ -207,37 +222,46 @@ class AxCircuit:
 
         for param_list in combinations:
             s = ""
-            rtl_source_edit = rtl_source_original
             for key in param_list:
                 value = param_list[key]
                 if s != "":
                     s = s + "_"
                 s = s + f"{value}"
-                rtl_source_edit = rtl_source_edit.replace(key, value)
+
+            # set new base name
+            if self.group_dir == "":
+                new_base = f"{self.top_name}_{s}/rtl"
+            else:
+                new_base = f"{self.group_dir}/{self.top_name}_{s}/rtl"
+
+
+            # copy all files from original base to new rtl base
+            copy_files(original_base, new_base)
+
+            # iterate through files to edit
+            for filename in self.source_files_to_edit:
+                file = open(f"{new_base}/{filename}.v", 'r')
+                rtl_source_original = file.read()
+                file.close
+
+                rtl_source_edit = rtl_source_original
+                for key in param_list:
+                    rtl_source_edit = rtl_source_edit.replace(key, param_list[key])
+
+                file = open(f"{new_base}/{filename}.v", 'w')
+                file.write(rtl_source_edit)
+                file.close()
 
             if self.synth_tool is not None:
                 s = s + "_" +  self.synth_tool
 
-            if self.group_dir == "":
-                base = f"{self.top_name}_{s}/rtl"
-            else:
-                base = f"{self.group_dir}/{self.top_name}_{s}/rtl"
 
-            try:
-                os.makedirs(base)
-
-                target = f"{s}"
-                file =  open(f"{base}/{self.top_name}.v", 'w')
-                file.write(rtl_source_edit)
-                file.close()
-
-                err = self.rtl2py(base=base, target=target)
-
-                if err is ErrorCodes.OK:
-                    self.run_testbench()
-
-            except FileExistsError:
-                print(f">>> Skipping combination \"{s}\" because it already exists (dir: {base})")
+            target = f"{s}"
+            err = self.rtl2py(base=new_base, target=target)
+            if err is ErrorCodes.OK:
+                self.run_testbench()
+            elif err is ErrorCodes.ALREADY_EXISTS:
+                print(f">>> Skipping combination \"{s}\" because it already exists (dir: {new_base})")
                 print("")
 
         print("------------------------------------------------------------------------------------")

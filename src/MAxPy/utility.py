@@ -1,6 +1,7 @@
 import enum
 import datetime
-
+import os
+import shutil
 
 version = '0.1.2-dev'
 
@@ -29,6 +30,7 @@ class ErrorCodes(enum.Enum):
     C2PY_PARSE_ERROR = enum.auto()
     C2PY_COMPILE_ERROR = enum.auto()
     CHECKPYMOD_ERROR = enum.auto()
+    ALREADY_EXISTS = enum.auto()
 
 
 def get_time_stamp():
@@ -54,6 +56,19 @@ def saif_indent_level(level):
 		space += '  '
 	return space
 
+#----------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------
+
+# copy all files from source_folder to destination_folder
+# destination folder is created if needed
+
+def copy_files(source_folder, destination_folder):
+    os.makedirs(destination_folder, exist_ok=True)
+    files = os.listdir(source_folder)
+    for file_name in files:
+        source_file = os.path.join(source_folder, file_name)
+        destination_file = os.path.join(destination_folder, file_name)
+        shutil.copy2(source_file, destination_file)
 
 
 #----------------------------------------------------------------------------------------------------------------------
