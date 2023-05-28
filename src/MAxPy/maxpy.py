@@ -61,6 +61,7 @@ class AxCircuit:
         self.results_filename = ""
         self.source_files_to_edit = []
         self.synth_skip = False
+        self.do_not_overwrite = False
 
     # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
     # getters and setters
@@ -88,6 +89,9 @@ class AxCircuit:
 
     def set_synth_skip(self, skip_flag):
         self.synth_skip = skip_flag
+
+    def set_do_not_overwrite(self, do_not_overwrite_flag):
+        self.do_not_overwrite = do_not_overwrite_flag
 
     # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
     # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -143,9 +147,12 @@ class AxCircuit:
         os.makedirs(self.source_output_dir, exist_ok = True)
         os.makedirs(self.target_netlist_dir, exist_ok = True)
 
-        for filename in os.listdir(self.target_compile_dir):
-            if filename.endswith("so"):
-                return ErrorCodes.ALREADY_EXISTS
+        if self.do_not_overwrite is True:
+            for filename in os.listdir(self.target_compile_dir):
+                if filename.endswith("so"):
+                    print(f">>> Skipping target \"{target}\" because it already exists ({base})")
+                    print("")
+                    return ErrorCodes.ALREADY_EXISTS
 
         self.trace_levels = 99  ##TODO: ???
 
@@ -158,6 +165,8 @@ class AxCircuit:
 
             if self.prun_netlist is False:
                 err = synth(self)
+
+                print("  > Logic synthesis ok")
 
                 if self.synth_opt is False:
                     self.synth_tool = None
@@ -175,7 +184,9 @@ class AxCircuit:
                 self.working_netlist = f"{base}/{self.top_name}.v"
 
             est_area(self)
+            print("  > Area estimation ok")
             est_power_timing(self)
+            print("  > Power and timing estimations ok")
 
             print(f"  > Netlist estimated area: {self.area:.3f}")
             print(f"  > Netlist estimated power = {self.power:.3f} uW")
@@ -260,9 +271,6 @@ class AxCircuit:
             err = self.rtl2py(base=new_base, target=target)
             if err is ErrorCodes.OK:
                 self.run_testbench()
-            elif err is ErrorCodes.ALREADY_EXISTS:
-                print(f">>> Skipping combination \"{s}\" because it already exists (dir: {new_base})")
-                print("")
 
         print("------------------------------------------------------------------------------------")
         print(">>> param loop end")
