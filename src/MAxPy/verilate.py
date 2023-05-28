@@ -22,6 +22,7 @@ def verilate(axckt):
                             + axckt.base_path + ' ' \
                             + axckt.res.path_tech_verilog + ' ' \
                             + axckt.res.axarith_path + '/adders/*.v ' \
+                            + axckt.res.axarith_path + '/multipliers/*.v ' \
                             + '--prefix ' + axckt.class_name + ' ' \
                             + '--mod-prefix sub'
 
@@ -36,6 +37,7 @@ def verilate(axckt):
                             + axckt.base_path + ' ' \
                             + axckt.res.path_tech_verilog + ' ' \
                             + axckt.res.axarith_path + '/adders/*.v ' \
+                            + axckt.res.axarith_path + '/multipliers/*.v ' \
                             + '--prefix ' + axckt.class_name + ' ' \
                             + '--mod-prefix sub'
 
