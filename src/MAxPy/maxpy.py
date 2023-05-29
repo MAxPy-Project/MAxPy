@@ -8,6 +8,7 @@ import importlib
 import itertools
 import copy
 from pandas import read_csv
+import csv
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
@@ -97,23 +98,7 @@ class AxCircuit:
     # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
     # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-    def rtl2py(self, base="", target=""):
-        if base == "":
-            base = "rtl"
-
-        self.current_parameter = target
-        if target != "":
-            target = "_" + target
-
-        self.class_name = f"{self.top_name}{target}"
-
-        #print("------------------------------------------------------------------------------------")
-        print("\n")
-        print(f">>> MAxPy rtl2py: converting Verilog RTL design \"{self.top_name}\" into Python module")
-        print(f"> Base \"{base}\", Target \"{target}\"")
-
-        print("> Start: " + get_time_stamp())
-
+    def init_data_b4_synth(self,base, target):
         if self.synth_tool is not None:
             if self.synth_tool in self.res.synth_tools:
                 self.synth_opt = True
@@ -147,18 +132,38 @@ class AxCircuit:
         os.makedirs(self.source_output_dir, exist_ok = True)
         os.makedirs(self.target_netlist_dir, exist_ok = True)
 
+        self.trace_levels = 99  ##TODO: ???
+
+        self.area = 0.0
+        self.power = 0.0
+        self.timing = 0.0
+
+    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+    def rtl2py(self, base="", target=""):
+        if base == "":
+            base = "rtl"
+
+        self.current_parameter = target
+        if target != "":
+            target = "_" + target
+
+        self.class_name = f"{self.top_name}{target}"
+
+        print(f">>> MAxPy rtl2py: converting Verilog RTL design \"{self.top_name}\" into Python module")
+        print(f"> Base \"{base}\", Target \"{target}\"")
+        print("> Start: " + get_time_stamp())
+
+        self.init_data_b4_synth(base, target)
+
         if self.do_not_overwrite is True:
             for filename in os.listdir(self.target_compile_dir):
                 if filename.endswith("so"):
                     print(f">>> Skipping target \"{target}\" because it already exists ({base})")
                     print("")
                     return ErrorCodes.ALREADY_EXISTS
-
-        self.trace_levels = 99  ##TODO: ???
-
-        self.area = 0.0
-        self.power = 0.0
-        self.timing = 0.0
 
         # synth: synthesize RTL file
         if self.synth_skip is False:
@@ -211,7 +216,6 @@ class AxCircuit:
 
         print("> End: " + get_time_stamp())
         print(">>> Circuit \"{t}\" converted successfully!".format(t=self.top_name))
-        print("")
 
         return ErrorCodes.OK
 
@@ -227,6 +231,10 @@ class AxCircuit:
         combinations = [dict(zip(keys, combination)) for combination in itertools.product(*values)]
 
         count=len(combinations)
+
+        synth_skip_temp = self.synth_skip
+        self.synth_skip = True
+
         print(f">>> Converting Verilog RTL design \"{self.top_name}\" into Python module with variable parameters")
         print(f">>> Iterating through {count} combinations")
         print("")
@@ -266,15 +274,60 @@ class AxCircuit:
             if self.synth_tool is not None:
                 s = s + "_" +  self.synth_tool
 
-
             target = f"{s}"
+
             err = self.rtl2py(base=new_base, target=target)
             if err is ErrorCodes.OK:
                 self.run_testbench()
+                if self.prun_flag is True:
+                    print("> Quality metrics are good, performing synth for area, power and delay estimations.")
+                    if target != "":
+                        new_target = "_" + target
+                    else:
+                        new_target = target
+                    synth_tool_temp = self.synth_tool
+                    self.synth_tool = "yosys"
+                    self.init_data_b4_synth(new_base, new_target)
+                    if synth(self) == ErrorCodes.OK:
+                        self.working_netlist = self.netlist_target_path
+                        est_area(self)
+                        print("  > Area estimation ok")
+                        est_power_timing(self)
+                        print("  > Power and timing estimations ok")
+                        print(f"  > Netlist estimated area: {self.area:.3f}")
+                        print(f"  > Netlist estimated power = {self.power:.3f} uW")
+                        print(f"  > Netlist estimated maximum delay = {self.timing:.3f} nS")
 
-        print("------------------------------------------------------------------------------------")
+                        with open(self.results_filename, "r") as file_handler:
+                            reader = csv.reader(file_handler, delimiter=";")
+                            data = list(reader)
+
+                        print()
+                        for row in data:
+                            if target in row[0]:
+                                row[1] = f"{self.area:.3f}"
+                                row[2] = f"{self.power:.3f}"
+                                row[3] = f"{self.timing:.3f}"
+                                break
+
+                        with open(self.results_filename, "w", newline="") as file_handler:
+                            writer = csv.writer(file_handler, delimiter=";")
+                            writer.writerows(data)
+
+                        print(f"> Estimations inserted into '{self.results_filename}'!")
+
+
+                    self.synth_tool = synth_tool_temp
+                else:
+                    print("> Skipping synth step because quality metrics did not reached the required value.")
+
+            print(f"Combination '{self.top_name}_{target}' finish!")
+            print("")
+
+        self.synth_skip = synth_skip_temp
+
+
         print(">>> param loop end")
-        print("------------------------------------------------------------------------------------")
         print("")
 
     # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -287,7 +340,7 @@ class AxCircuit:
             mod = importlib.import_module(mod_name, package=None)
             self.node_info = []
             self.prun_flag, self.node_info = self.testbench_script(ckt=mod, results_filename=self.results_filename)
-            print("> Testbench end\n")
+            print("> Testbench end")
             return ErrorCodes.OK
 
 
