@@ -12,6 +12,7 @@ import csv
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
+import matplotlib
 
 from .utility import *
 from .resources import Resources
@@ -385,6 +386,8 @@ class AxCircuit:
 
 
     def get_pareto_front(self, x_name, y_name):
+        font = {"size": 16}
+        matplotlib.rc("font", **font)
         csv_data = read_csv(self.results_filename, delimiter=";")
         x_data = csv_data[x_name].tolist()
         y_data = csv_data[y_name].tolist()
@@ -405,6 +408,7 @@ class AxCircuit:
         with open(pareto_filename, "w") as pareto_file:
             print(f"> Saving pareto list into file: {pareto_filename}")
             pareto_file.write("\n".join(x for x in pareto_elements))
+        plt.figure(figsize=(10,6))
         plt.scatter(x_data, y_data, color="blue", marker=".", label="_nolegend_")
         plt.scatter(x_pareto, y_pareto, 200, color="red", edgecolors="black", marker="*", label="_nolegend_")
         plt.plot(x_pareto, y_pareto, color='black', marker='.', linewidth=3, markersize=1, zorder=0)
