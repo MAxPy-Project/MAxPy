@@ -5,7 +5,7 @@
 using namespace std;
 using namespace pybind11::literals;
 
-//-----------------------------------------------------------------------------
+
 // "Net" class methods:
 
 [[SAIF_OPT_IN]]Net::Net(const char* name_in, void *p_val, unsigned int bit_mask_in) {
@@ -67,7 +67,7 @@ unsigned int Net::get_val() {
 	}
 }[[SAIF_OPT_OUT]]
 
-//-----------------------------------------------------------------------------
+
 // "Instance" class methods:
 
 [[SAIF_OPT_IN]]Instance::Instance(const char* name_in) {
@@ -77,7 +77,7 @@ unsigned int Net::get_val() {
 	head_net = nullptr;
 }[[SAIF_OPT_OUT]]
 
-//-----------------------------------------------------------------------------
+
 // "AxPy_[[CLASS_NAME]]" class methods:
 
 
@@ -330,7 +330,8 @@ void MAxPy_[[CLASS_NAME]]::saif_print_instance(FILE *file_handler, Instance *pi,
 // 		printf("pi nullptr!\n");
 // 	}
 // }
-//-----------------------------------------------------------------------------
+
+
 // Pybind wrapper code:
 
 PYBIND11_MODULE([[MODULE_NAME]], m) {
@@ -355,6 +356,3 @@ PYBIND11_MODULE([[MODULE_NAME]], m) {
 
 	m.attr("saif_opt") = [[SAIF_OPT_VALUE]];
 }
-//-----------------------------------------------------------------------------
-// EOF
-//-----------------------------------------------------------------------------

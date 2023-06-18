@@ -10,10 +10,8 @@
 
 namespace py = pybind11;
 
-//---------------------------------------------------------------------------------------------------------------------
+
 // "Net" class
-
-
 [[SAIF_OPT_IN]]class Net {
 	public:
 		Net(const char* name_in, void *p_val, unsigned int bit_mask_in);
@@ -35,9 +33,9 @@ namespace py = pybind11;
 		bool first;
 		Net *next;
 };[[SAIF_OPT_OUT]]
-//---------------------------------------------------------------------------------------------------------------------
-// "Instance" class
 
+
+// "Instance" class
 [[SAIF_OPT_IN]]class Instance {
 	public:
 		Instance(const char* name_in);
@@ -46,9 +44,9 @@ namespace py = pybind11;
 		Instance *next;
 		Net *head_net;
 };[[SAIF_OPT_OUT]]
-//---------------------------------------------------------------------------------------------------------------------
-// "MAxPy_V[[CLASS_NAME]]" class
 
+
+// "MAxPy_V[[CLASS_NAME]]" class
 #pragma GCC visibility push(hidden)
 class MAxPy_[[CLASS_NAME]] : public [[CLASS_NAME]] {
 	public:
@@ -93,8 +91,4 @@ class MAxPy_[[CLASS_NAME]] : public [[CLASS_NAME]] {
 [[GETTERS_AND_SETTERS_DECLARATION]]};
 #pragma GCC visibility pop
 
-//---------------------------------------------------------------------------------------------------------------------
 #endif
-//---------------------------------------------------------------------------------------------------------------------
-//  EOF
-//---------------------------------------------------------------------------------------------------------------------

@@ -65,7 +65,7 @@ class AxCircuit:
         self.synth_skip = False
         self.do_not_overwrite = False
 
-    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
     # getters and setters
 
     def set_group(self, path):
@@ -86,18 +86,18 @@ class AxCircuit:
         else:
             self.results_filename= f"{self.group_dir}/{filename}"
 
+
     def set_source_files_to_edit(self, filelist):
         self.source_files_to_edit = filelist
+
 
     def set_synth_skip(self, skip_flag):
         self.synth_skip = skip_flag
 
+
     def set_do_not_overwrite(self, do_not_overwrite_flag):
         self.do_not_overwrite = do_not_overwrite_flag
-
-    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+    
 
     def init_data_b4_synth(self,base, target):
         if self.synth_tool is not None:
@@ -139,9 +139,6 @@ class AxCircuit:
         self.power = 0.0
         self.timing = 0.0
 
-    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
     def rtl2py(self, base="", target=""):
         if base == "":
@@ -219,8 +216,6 @@ class AxCircuit:
         print(">>> Circuit \"{t}\" converted successfully!".format(t=self.top_name))
 
         return ErrorCodes.OK
-
-    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 
     def rtl2py_param_loop(self, base = ""):
@@ -331,8 +326,6 @@ class AxCircuit:
         print(">>> param loop end")
         print("")
 
-    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
 
     def run_testbench(self):
         if self.testbench_script is not None:
@@ -343,9 +336,6 @@ class AxCircuit:
             self.prun_flag, self.node_info = self.testbench_script(ckt=mod, results_filename=self.results_filename)
             print("> Testbench end")
             return ErrorCodes.OK
-
-
-    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 
     # def testbench_param_loop(self):
@@ -381,8 +371,6 @@ class AxCircuit:
     #         self.current_parameter = target
     #
     #         self.run_testbench()
-
-    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 
     def get_pareto_front(self, x_name, y_name):
@@ -422,7 +410,3 @@ class AxCircuit:
         plt.savefig(pareto_image.replace(".pdf", ".png"))
         plt.show()
         return pareto_circuits
-
-    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-    # end of AxCircuit class
-    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .

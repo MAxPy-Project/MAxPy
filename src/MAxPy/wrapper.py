@@ -5,23 +5,18 @@ from .utility import ErrorCodes
 import re
 import os
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 def wrapper(axckt):
 
     print("> C++/Python Wrapper")
 
-    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
     # remove old source files
-
     rm_old_files_string = f"rm -f {axckt.wrapper_cpp_path} {axckt.wrapper_header_path}"
     child = Popen(rm_old_files_string, shell=True)
     child.communicate()
     child.wait()
 
-    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
     # get instance and nets structure
-
     axckt.parent_list = []
     header_filename = f"{axckt.class_name}.h"
     top_instance = parse_verilator_header(axckt, header_filename, axckt.top_name)
@@ -36,9 +31,7 @@ def wrapper(axckt):
     log_file.write('\n\n')
     log_file.close()
 
-    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
     #prepare python biding string
-
     pybind_string = "\t\t// verilator model methods\n"
     getters_and_setters_declaration = ""
     getters_and_setters_definition = ""
@@ -92,9 +85,7 @@ def wrapper(axckt):
         axckt.parent_list = []
         write_instance_source_files(axckt, top_instance, skip_nets_first=True)
 
-    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
     # wrapper source file
-
     file_text = axckt.res.template_pybind_wrapper_source
     file_text = file_text.replace("[[MAXPY_VERSION]]", version)
     file_text = file_text.replace("[[MODULE_NAME]]", axckt.top_name)
@@ -135,9 +126,7 @@ def wrapper(axckt):
     with open(axckt.wrapper_cpp_path, "w") as f:
         f.write(file_text)
 
-    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
     # wrapper header file
-
     file_text = axckt.res.template_pybind_wrapper_header
 
     axckt.parent_list = []
@@ -171,11 +160,9 @@ def wrapper(axckt):
 
     with open(axckt.wrapper_header_path, "w") as f:
         f.write(file_text)
-    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
     return ErrorCodes.OK
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 
 def parse_verilator_header(axckt, header_filename, instance_name):
 
@@ -249,8 +236,6 @@ def parse_verilator_header(axckt, header_filename, instance_name):
 
     return instance
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def look4nets(axckt, text, skip_ports):
     net_list = []
@@ -398,8 +383,6 @@ def look4nets(axckt, text, skip_ports):
                 net_list.append(net)
     return net_list
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def write_instance_source_files(axckt, instance, skip_nets_first=False):
 
@@ -479,8 +462,6 @@ def write_instance_source_files(axckt, instance, skip_nets_first=False):
 
     axckt.parent_list = axckt.parent_list[:-1]
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def get_instance_methods(axckt, instance):
 
@@ -500,8 +481,6 @@ def get_instance_methods(axckt, instance):
 
     return method_list
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def show_structure(instance, level):
 
@@ -524,8 +503,6 @@ def show_structure(instance, level):
 
 	return str
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def look4classes(text):
 	search_pattern = 'class '
@@ -536,8 +513,6 @@ def look4classes(text):
 			class_list.append(line.replace(search_pattern, '').replace(';',''))
 	return class_list
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def look4methods(text):
 	method_list = []
@@ -561,8 +536,6 @@ def look4methods(text):
 
 	return method_list
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def look4includes(header_path):
 	header = open(header_path)
@@ -575,8 +548,6 @@ def look4includes(header_path):
 			include_list.append(line)
 	return include_list
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def get_net_hierarchical_name(net):
 	str_out = ''
@@ -585,8 +556,6 @@ def get_net_hierarchical_name(net):
 	str_out += net['name']
 	return str_out
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def write_net_structure(str, instance, level, instance_index):
 
@@ -640,6 +609,3 @@ def write_net_structure(str, instance, level, instance_index):
 		str = write_net_structure(str, inst, level + 1, index)
 
 	return str
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

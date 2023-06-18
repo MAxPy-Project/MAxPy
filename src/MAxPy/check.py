@@ -4,13 +4,9 @@ from .utility import ErrorCodes
 def check(axckt):
     print("> Module check (should print module\'s name)")
 
-    #print('  > Runnin test script (should print module\'s name):')
-
     module_test_string = "python -c \""
     module_test_string += "from {m} import {n};".format(m=axckt.pymod_path, n=axckt.top_name)
     module_test_string += "print('  >', %s.top().name())\"" % (axckt.top_name)
-
-    #print(module_test_string)
 
     child = Popen(module_test_string, shell=True)
     child.communicate()

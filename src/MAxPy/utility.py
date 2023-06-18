@@ -23,6 +23,7 @@ class MainLoopFsm(enum.Enum):
 	PRUNING = enum.auto()
 	END = enum.auto()
 
+
 class ErrorCodes(enum.Enum):
     OK = enum.auto()
     SYNTH_ERROR = enum.auto()
@@ -45,22 +46,12 @@ def get_time_stamp():
 	return date_string
 
 
-
-#----------------------------------------------------------------------------------------------------------------------
-#----------------------------------------------------------------------------------------------------------------------
-# veri2c parser functions
-
 def saif_indent_level(level):
 	space = ''
 	for i in range(level):
 		space += '  '
 	return space
 
-#----------------------------------------------------------------------------------------------------------------------
-#----------------------------------------------------------------------------------------------------------------------
-
-# copy all files from source_folder to destination_folder
-# destination folder is created if needed
 
 def copy_files(source_folder, destination_folder):
     os.makedirs(destination_folder, exist_ok=True)
@@ -69,8 +60,3 @@ def copy_files(source_folder, destination_folder):
         source_file = os.path.join(source_folder, file_name)
         destination_file = os.path.join(destination_folder, file_name)
         shutil.copy2(source_file, destination_file)
-
-
-#----------------------------------------------------------------------------------------------------------------------
-#	eof
-#----------------------------------------------------------------------------------------------------------------------
