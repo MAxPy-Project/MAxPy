@@ -7,8 +7,9 @@ MAxPy is part of the **MAxPy Project** - a growing collaborative effort to make 
 
 
 
-.. note::
-   This project is under active development.
+    .. note::
+        
+        This project is under active development.
 
 Contents
 --------

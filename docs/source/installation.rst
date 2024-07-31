@@ -14,8 +14,10 @@ System packages
 
 As MAxPy relies on other open-source tools, you need first to install them in your system prior to using it.
 
-.. note::
-   The following instructions will consider the **APT (Advanced Packaging Tool)** for installing the desired packages in your Debian based (``apt-get`` command). However, depending on your system, other package managers can be used, such as ``pacman`` for Arch based systems.
+    .. note::
+
+        The following instructions will consider the **APT (Advanced Packaging Tool)** for installing the desired packages in your Debian based (``apt-get`` command). However, depending on your system, other package managers can be used, such as ``pacman`` for Arch based systems.
+
 
 Before installing the tools, it is recommended to install some basic system packages used for *building packages from source*:
 
@@ -46,6 +48,7 @@ Before installing the tools, it is recommended to install some basic system pack
     Verilator is the simulation tool which allows Verilog circuits to be simulated as a computer program.  Despite Verilator being available at the ``apt`` package manager, it is needed to install it from source because some source files from the repository are needed during circuits' compilation. Instruction are available at their `Installation page <https://verilator.org/guide/latest/install.html>`_. Also, you can check the `Verilator official repository <https://github.com/verilator/verilator>`_. Here follows a summary of main comands. Please note that the recommended Verilator version for MAxPy is ``v5.002``.
 
     .. code:: bash
+
         git clone https://github.com/verilator/verilator   # only first time
         cd verilator
         git checkout v5.002

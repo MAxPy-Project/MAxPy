@@ -5,8 +5,9 @@ This basic tutorial covers the basic functions of the MAxPy framework. By the en
 
 To follow this tutorial, you can create and edit the files as requested, or you can use the code available `here <https://github.com/MAxPy-Project/MAxPy-Tutorial>`_.
 
-.. note::
-   Basic means *base*, not *easy*! =D
+    .. note::
+    
+        Basic means *base*, not *easy*! =D
 
 .. _basic_tutorial_problem:
 
