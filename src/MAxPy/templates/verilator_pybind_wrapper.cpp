@@ -92,7 +92,7 @@ MAxPy_[[CLASS_NAME]]::MAxPy_[[CLASS_NAME]](const char* name = "TOP") : [[CLASS_N
 	last_main_time = 0;
 	top_instance = [[TOP_INSTANCE_METHOD]]();
 	saif_path = "";
-    saif_output = false;[[SAIF_OPT_OUT]]
+	saif_output = false;[[SAIF_OPT_OUT]]
 }
 
 MAxPy_[[CLASS_NAME]]::~MAxPy_[[CLASS_NAME]]() {
@@ -335,7 +335,6 @@ void MAxPy_[[CLASS_NAME]]::saif_print_instance(FILE *file_handler, Instance *pi,
 // Pybind wrapper code:
 
 PYBIND11_MODULE([[MODULE_NAME]], m) {
-	//py::class_<MAxPy_[[CLASS_NAME]]>(m, "[[MODULE_NAME]]")
     py::class_<MAxPy_[[CLASS_NAME]]>(m, "top")
 		.def(py::init<const char *>(), py::arg("name")="[[MODULE_NAME]]")
 		.def("name", &MAxPy_[[CLASS_NAME]]::name)

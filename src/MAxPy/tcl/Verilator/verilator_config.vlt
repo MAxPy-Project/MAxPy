@@ -11,3 +11,4 @@ lint_off -rule SYNCASYNCNET
 lint_off -rule IMPLICIT
 lint_off -rule UNOPTFLAT
 lint_off -rule PINCONNECTEMPTY
+lint_off -rule MODDUP

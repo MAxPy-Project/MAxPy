@@ -2,8 +2,9 @@ import enum
 import datetime
 import os
 import shutil
+import fnmatch
 
-version = '0.1.2-dev'
+version = '0.1.2'
 
 
 class MainLoopFsm(enum.Enum):
@@ -60,3 +61,9 @@ def copy_files(source_folder, destination_folder):
         source_file = os.path.join(source_folder, file_name)
         destination_file = os.path.join(destination_folder, file_name)
         shutil.copy2(source_file, destination_file)
+
+
+def find_verilog_files(dir):
+	for root, dirs, files in os.walk(dir):
+		for file in fnmatch.filter(files, "*.v"):
+			yield file

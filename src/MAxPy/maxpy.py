@@ -61,7 +61,6 @@ class AxCircuit:
         self.log_opt = True
         self.synth_tool = None
         self.results_filename = ""
-        self.source_files_to_edit = []
         self.synth_skip = False
         self.do_not_overwrite = False
 
@@ -87,10 +86,6 @@ class AxCircuit:
             self.results_filename= f"{self.group_dir}/{filename}"
 
 
-    def set_source_files_to_edit(self, filelist):
-        self.source_files_to_edit = filelist
-
-
     def set_synth_skip(self, skip_flag):
         self.synth_skip = skip_flag
 
@@ -99,7 +94,7 @@ class AxCircuit:
         self.do_not_overwrite = do_not_overwrite_flag
     
 
-    def init_data_b4_synth(self,base, target):
+    def init_data_b4_synth(self, base, target):
         if self.synth_tool is not None:
             if self.synth_tool in self.res.synth_tools:
                 self.synth_opt = True
@@ -112,14 +107,20 @@ class AxCircuit:
             self.synth_tool = "yosys"
 
         self.base_path = f"{base}/{self.top_name}.v"
-        self.rtl_base_pah = base
+        self.rtl_base_path = base
         if self.group_dir == "":
             self.target_compile_dir = f"{self.top_name}{target}/"
             self.pymod_path = f"{self.top_name}{target}"
         else:
             self.target_compile_dir = f"{self.group_dir}/{self.top_name}{target}/"
             self.pymod_path = f"{self.group_dir}.{self.top_name}{target}"
-        self.target_netlist_dir = "{t}netlist_{s}/".format(t=self.target_compile_dir, s=self.synth_tool)
+        
+        if self.synth_tool is not None:
+            self.target_netlist_dir = "{t}netlist_{s}/".format(t=self.target_compile_dir, s=self.synth_tool)
+        else:
+            self.target_netlist_dir = "{t}netlist/".format(t=self.target_compile_dir)
+        
+        
         self.source_output_dir = "{t}source/".format(t=self.target_compile_dir)
 
         self.compiled_module_path = "{t}{c}.so".format(t=self.target_compile_dir, c=self.top_name)
@@ -254,8 +255,11 @@ class AxCircuit:
             copy_files(original_base, new_base)
 
             # iterate through files to edit
-            for filename in self.source_files_to_edit:
-                file = open(f"{new_base}/{filename}.v", 'r')
+            for filename in find_verilog_files(new_base):
+
+                print("filename:", filename)
+
+                file = open(f"{new_base}/{filename}", 'r')
                 rtl_source_original = file.read()
                 file.close
 
@@ -263,7 +267,7 @@ class AxCircuit:
                 for key in param_list:
                     rtl_source_edit = rtl_source_edit.replace(key, param_list[key])
 
-                file = open(f"{new_base}/{filename}.v", 'w')
+                file = open(f"{new_base}/{filename}", 'w')
                 file.write(rtl_source_edit)
                 file.close()
 

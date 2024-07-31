@@ -18,11 +18,13 @@ def verilate(axckt):
                             + '-Wall -Wno-UNUSED -cc -O0 -top ' + axckt.top_name + ' ' \
                             + '-Mdir ' + axckt.source_output_dir + ' ' \
                             + axckt.res.verilator_config_path + ' ' \
-                            + '-I' + axckt.rtl_base_pah + ' ' \
                             + axckt.base_path + ' ' \
                             + axckt.res.path_tech_verilog + ' ' \
                             + axckt.res.axarith_path + '/adders/*.v ' \
                             + axckt.res.axarith_path + '/multipliers/*.v ' \
+                            + '-I' + axckt.rtl_base_path + ' ' \
+                            + '-I' + axckt.res.axarith_path + '/adders/ ' \
+                            + '-I' + axckt.res.axarith_path + '/multipliers/ ' \
                             + '--prefix ' + axckt.class_name + ' ' \
                             + '--mod-prefix sub'
 
@@ -33,11 +35,13 @@ def verilate(axckt):
                             + '-Wall -Wno-UNUSED -cc -top ' + axckt.top_name + ' ' \
                             + '-Mdir ' + axckt.source_output_dir + ' ' \
                             + axckt.res.verilator_config_path + ' ' \
-                            + '-I' + axckt.rtl_base_pah + ' ' \
                             + axckt.base_path + ' ' \
                             + axckt.res.path_tech_verilog + ' ' \
                             + axckt.res.axarith_path + '/adders/*.v ' \
                             + axckt.res.axarith_path + '/multipliers/*.v ' \
+                            + '-I' + axckt.rtl_base_path + ' ' \
+                            + '-I' + axckt.res.axarith_path + '/adders/ ' \
+                            + '-I' + axckt.res.axarith_path + '/multipliers/ ' \
                             + '--prefix ' + axckt.class_name + ' ' \
                             + '--mod-prefix sub'
 

@@ -31,34 +31,27 @@ Before installing the tools, it is recommended to install some basic system pack
 
         sudo apt-get install yosys
 
-    In principle any version available in the repositories should work. If you have any trouble, please let us know.
-
 
 #. Install **OpenSTA**
 
-    OpenSTA is the tool used for static timing analysis and power estimations based on the get-level netlists. As OpenSTA may not be available at the package manager in every Linux distribution, it is advised to build it STA from source. Please check the build instructions at the `OpenSTA official repository <https://github.com/The-OpenROAD-Project/OpenSTA>`_.
-
-    For short, you can use the following commands, but in case of any trouble, please the check the full install instruction at their repository.
+    OpenSTA is the tool used for static timing analysis and power estimations based on the get-level netlists. You can either install it from source following the guidelines available at the `OpenSTA official repository <https://github.com/The-OpenROAD-Project/OpenSTA>`_, or you can use the ``apt`` package manager.
 
     .. code:: bash
 
-        git clone https://github.com/The-OpenROAD-Project/OpenSTA.git
-        cd OpenSTA
-        mkdir build
-        cd build
-        cmake ..
-        make
-        sudo make install
+        sudo apt-get install opensta
+
 
 #. Install **Verilator**
 
-    Verilator is the simulation tool which allows Verilog circuits to be simulated as a computer program.  Despite Verilator being available at the ``apt`` package manager, you should check its version. MAxPy currently works with Verilator version ``v5.002``.
+    Verilator is the simulation tool which allows Verilog circuits to be simulated as a computer program.  Despite Verilator being available at the ``apt`` package manager, it is needed to install it from source because some source files from the repository are needed during circuits' compilation. Instruction are available at their `Installation page <https://verilator.org/guide/latest/install.html>`_. Also, you can check the `Verilator official repository <https://github.com/verilator/verilator>`_. Here follows a summary of main comands. Please note that the recommended Verilator version for MAxPy is ``v5.002``.
 
     .. code:: bash
-
-        sudo apt-get install verilator
-
-    However, Verilator can be built from source aswell. You can the instruction available at their `Installation page <https://verilator.org/guide/latest/install.html>`_. Also, you can check the `Verilator official repository <https://github.com/verilator/verilator>`_.
+        git clone https://github.com/verilator/verilator   # only first time
+        cd verilator
+        git checkout v5.002
+        autoconf         # Create ./configure script
+        ./configure      # Configure and create Makefile
+        make -j `nproc`  # Buil
 
 #. Install `pybind11 <https://pybind11.readthedocs.io/>`_
 
